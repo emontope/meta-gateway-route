@@ -8,3 +8,10 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+# Toperouter architecture rules
+
+- Upstream gateway API keys are readable only by service-role code (column-level GRANT excludes `api_key`) — they must never reach the browser.
+- The OpenAI-compatible proxy lives under `/api/public/v1/*` and authenticates by SHA-256 hash of the `tr-` key — public prefix is required to bypass site auth for external callers.
+- Routing order: `slug/model` prefix → routing_rules by priority → enabled gateways by last latency; fail over on 429/5xx — keeps behavior predictable.
+- Skeuomorphic styling lives in `src/styles.css` component classes (`panel`, `well`, `btn`, `field`, `led`) — reuse them instead of ad-hoc shadows.
