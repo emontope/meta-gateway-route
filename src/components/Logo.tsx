@@ -21,7 +21,7 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
             <stop offset="0" stopColor="oklch(0.56 0.16 295)" />
             <stop offset="1" stopColor="oklch(0.36 0.15 295)" />
           </linearGradient>
-          <linearGradient id="tr-chrome" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="tr-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="90">
             <stop offset="0" stopColor="oklch(0.99 0 0)" />
             <stop offset="1" stopColor="oklch(0.8 0.02 295)" />
           </linearGradient>
