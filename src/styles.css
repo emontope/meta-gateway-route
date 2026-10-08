@@ -109,7 +109,7 @@
       0 1px 0 var(--hi);
   }
   .field {
-    @apply well w-full px-3 py-2 text-sm font-mono text-foreground outline-none placeholder:text-muted-foreground;
+    @apply w-full rounded-lg border px-3 py-2 text-sm font-mono text-foreground outline-none placeholder:text-muted-foreground;
     background: oklch(0.95 0.004 290);
     box-shadow: inset 0 2px 3px oklch(0.25 0.03 290 / 0.25), 0 1px 0 var(--hi);
   }
