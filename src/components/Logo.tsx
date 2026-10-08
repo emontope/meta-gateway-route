@@ -7,6 +7,8 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
     <div className={cn("flex items-center", xl ? "gap-6 md:gap-8" : "gap-3", className)}>
       <svg
         viewBox="0 0 120 120"
+        width={xl ? 176 : 40}
+        height={xl ? 176 : 40}
         className={xl ? "size-28 md:size-44 shrink-0" : "size-10 shrink-0"}
         aria-hidden
       >
