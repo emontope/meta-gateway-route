@@ -110,9 +110,9 @@ function Gateways() {
   const { data: gws = [], isLoading } = useGateways();
   const create = useServerFn(createGateway);
   const test = useServerFn(testGateway);
-  const [preset, setPreset] = useState(GATEWAY_PRESETS[0]);
-  const [name, setName] = useState(GATEWAY_PRESETS[0].name);
-  const [baseUrl, setBaseUrl] = useState(GATEWAY_PRESETS[0].baseUrl);
+  const [preset, setPreset] = useState(GATEWAY_PRESETS[0]!);
+  const [name, setName] = useState(GATEWAY_PRESETS[0]!.name);
+  const [baseUrl, setBaseUrl] = useState(GATEWAY_PRESETS[0]!.baseUrl);
   const [apiKey, setApiKey] = useState("");
   const [testing, setTesting] = useState<string | null>(null);
 
@@ -343,7 +343,7 @@ function Routing() {
     const { error } = await supabase.from("routing_rules").insert({
       user_id: u.user!.id, model_pattern: pattern.trim(), gateway_id: gatewayId, upstream_model: upstream.trim() || null, priority,
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setPattern(""); setUpstream("");
     qc.invalidateQueries({ queryKey: ["rules"] });
   }

@@ -63,7 +63,7 @@ export async function handleChat(request: Request) {
   } catch {
     return err(400, "Body must be JSON");
   }
-  const model = typeof body.model === "string" ? body.model : "";
+  const model = typeof body["model"] === "string" ? body["model"] : "";
   if (!model) return err(400, "`model` is required");
 
   const { admin, userId, keyId } = auth;
@@ -99,7 +99,7 @@ export async function handleChat(request: Request) {
     }
   }
 
-  const stream = body.stream === true;
+  const stream = body["stream"] === true;
   let lastErr = "";
   let lastStatus = 502;
   for (const { gw, upstreamModel } of candidates) {
@@ -156,7 +156,7 @@ async function log(
   admin: Admin,
   e: {
     userId: string; keyId: string; gw: Gw; model: string; upstreamModel: string; status: number;
-    latency: number; stream: boolean; promptTokens?: number; completionTokens?: number; error?: string;
+    latency: number; stream: boolean; promptTokens?: number | undefined; completionTokens?: number | undefined; error?: string | undefined;
   },
 ) {
   await Promise.all([
