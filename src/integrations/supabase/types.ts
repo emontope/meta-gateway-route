@@ -14,7 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          revoked?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gateways: {
+        Row: {
+          api_key: string
+          base_url: string
+          created_at: string
+          enabled: boolean
+          id: string
+          last_error: string | null
+          last_latency_ms: number | null
+          last_model_count: number | null
+          last_status: string | null
+          last_tested_at: string | null
+          name: string
+          provider: string
+          slug: string
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          base_url: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_latency_ms?: number | null
+          last_model_count?: number | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          name: string
+          provider: string
+          slug: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          base_url?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_latency_ms?: number | null
+          last_model_count?: number | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          name?: string
+          provider?: string
+          slug?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      routing_rules: {
+        Row: {
+          created_at: string
+          gateway_id: string
+          id: string
+          model_pattern: string
+          priority: number
+          upstream_model: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gateway_id: string
+          id?: string
+          model_pattern: string
+          priority?: number
+          upstream_model?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gateway_id?: string
+          id?: string
+          model_pattern?: string
+          priority?: number
+          upstream_model?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routing_rules_gateway_id_fkey"
+            columns: ["gateway_id"]
+            isOneToOne: false
+            referencedRelation: "gateways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_logs: {
+        Row: {
+          api_key_id: string | null
+          completion_tokens: number | null
+          created_at: string
+          error: string | null
+          gateway_id: string | null
+          gateway_name: string | null
+          id: string
+          latency_ms: number | null
+          model: string | null
+          prompt_tokens: number | null
+          status: number | null
+          stream: boolean
+          upstream_model: string | null
+          user_id: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          error?: string | null
+          gateway_id?: string | null
+          gateway_name?: string | null
+          id?: string
+          latency_ms?: number | null
+          model?: string | null
+          prompt_tokens?: number | null
+          status?: number | null
+          stream?: boolean
+          upstream_model?: string | null
+          user_id: string
+        }
+        Update: {
+          api_key_id?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          error?: string | null
+          gateway_id?: string | null
+          gateway_name?: string | null
+          id?: string
+          latency_ms?: number | null
+          model?: string | null
+          prompt_tokens?: number | null
+          status?: number | null
+          stream?: boolean
+          upstream_model?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
