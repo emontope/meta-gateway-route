@@ -22,3 +22,5 @@ export function globMatch(pattern: string, value: string) {
   );
   return re.test(value);
 }
+
+export { slugify } from "./gateway-presets";
