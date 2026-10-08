@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className?: string }) {
   const xl = size === "xl";
   return (
-    <div className={cn("flex items-center", xl ? "gap-6 md:gap-8" : "gap-3", className)}>
+    <div className={cn("flex flex-wrap items-center", xl ? "gap-6 md:gap-8" : "gap-3", className)}>
       <svg
         viewBox="0 0 120 120"
         width={xl ? 176 : 40}
@@ -49,7 +49,7 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
         <div
           className={cn(
             "font-display font-black tracking-tight",
-            xl ? "text-6xl sm:text-7xl md:text-[8.5rem]" : "text-xl",
+            xl ? "text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem]" : "text-xl",
           )}
           style={{
             color: "var(--foreground)",
