@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -44,14 +46,15 @@ function AuthPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
+    <main className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="panel w-full max-w-md p-8">
         <Logo />
         <h1 className="mt-8 font-display text-2xl font-bold">Console access</h1>
         <p className="mt-2 text-sm text-muted-foreground">Sign in to manage gateways, keys and routing.</p>
-        <button onClick={google} disabled={busy} className="btn btn-primary mt-6 w-full py-3">
+        <Button onClick={google} disabled={busy} className="mt-6 w-full py-3">
           {busy ? "Connecting…" : "Continue with Google"}
-        </button>
+        </Button>
+        <p className="mt-5 text-xs text-muted-foreground">By continuing, you agree to the <Link to="/terms" className="text-primary underline">Terms of Service</Link>.</p>
         {err && <p className="mt-4 text-sm text-destructive">{err}</p>}
       </div>
     </main>

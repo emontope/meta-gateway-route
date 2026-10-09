@@ -12,7 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedGatewaysRouteImport } from './routes/_authenticated/gateways'
+import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authenticated/playground'
+import { Route as AuthenticatedRoutingRouteImport } from './routes/_authenticated/routing'
+import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated/usage'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
@@ -30,9 +35,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGatewaysRoute = AuthenticatedGatewaysRouteImport.update({
+  id: '/gateways',
+  path: '/gateways',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlaygroundRoute = AuthenticatedPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRoutingRoute = AuthenticatedRoutingRouteImport.update({
+  id: '/routing',
+  path: '/routing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsageRoute = AuthenticatedUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicV1ModelsRoute = ApiPublicV1ModelsRouteImport.update({
@@ -50,14 +80,24 @@ const ApiPublicV1ChatCompletionsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api-keys': typeof AuthenticatedApiKeysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
+  '/routing': typeof AuthenticatedRoutingRoute
+  '/usage': typeof AuthenticatedUsageRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/api-keys': typeof AuthenticatedApiKeysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
+  '/routing': typeof AuthenticatedRoutingRoute
+  '/usage': typeof AuthenticatedUsageRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -66,7 +106,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/gateways': typeof AuthenticatedGatewaysRoute
+  '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
+  '/_authenticated/routing': typeof AuthenticatedRoutingRoute
+  '/_authenticated/usage': typeof AuthenticatedUsageRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -75,14 +120,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/api-keys'
     | '/dashboard'
+    | '/gateways'
+    | '/playground'
+    | '/routing'
+    | '/usage'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/api-keys'
     | '/dashboard'
+    | '/gateways'
+    | '/playground'
+    | '/routing'
+    | '/usage'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   id:
@@ -90,7 +145,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/api-keys'
     | '/_authenticated/dashboard'
+    | '/_authenticated/gateways'
+    | '/_authenticated/playground'
+    | '/_authenticated/routing'
+    | '/_authenticated/usage'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
@@ -126,11 +186,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/api-keys': {
+      id: '/_authenticated/api-keys'
+      path: '/api-keys'
+      fullPath: '/api-keys'
+      preLoaderRoute: typeof AuthenticatedApiKeysRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gateways': {
+      id: '/_authenticated/gateways'
+      path: '/gateways'
+      fullPath: '/gateways'
+      preLoaderRoute: typeof AuthenticatedGatewaysRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/playground': {
+      id: '/_authenticated/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof AuthenticatedPlaygroundRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/routing': {
+      id: '/_authenticated/routing'
+      path: '/routing'
+      fullPath: '/routing'
+      preLoaderRoute: typeof AuthenticatedRoutingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usage': {
+      id: '/_authenticated/usage'
+      path: '/usage'
+      fullPath: '/usage'
+      preLoaderRoute: typeof AuthenticatedUsageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/v1/models': {
@@ -151,11 +246,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGatewaysRoute: typeof AuthenticatedGatewaysRoute
+  AuthenticatedPlaygroundRoute: typeof AuthenticatedPlaygroundRoute
+  AuthenticatedRoutingRoute: typeof AuthenticatedRoutingRoute
+  AuthenticatedUsageRoute: typeof AuthenticatedUsageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGatewaysRoute: AuthenticatedGatewaysRoute,
+  AuthenticatedPlaygroundRoute: AuthenticatedPlaygroundRoute,
+  AuthenticatedRoutingRoute: AuthenticatedRoutingRoute,
+  AuthenticatedUsageRoute: AuthenticatedUsageRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

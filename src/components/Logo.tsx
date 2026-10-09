@@ -14,25 +14,25 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
       >
         <defs>
           <linearGradient id="tr-rim" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="oklch(0.97 0.005 290)" />
-            <stop offset="1" stopColor="oklch(0.62 0.015 290)" />
+            <stop offset="0" stopColor="var(--metal-highlight)" />
+            <stop offset="1" stopColor="var(--metal-edge)" />
           </linearGradient>
           <linearGradient id="tr-face" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="oklch(0.56 0.16 295)" />
-            <stop offset="1" stopColor="oklch(0.36 0.15 295)" />
+            <stop offset="0" stopColor="var(--purple-highlight)" />
+            <stop offset="1" stopColor="var(--purple-edge)" />
           </linearGradient>
           <linearGradient id="tr-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="90">
-            <stop offset="0" stopColor="oklch(0.99 0 0)" />
-            <stop offset="1" stopColor="oklch(0.8 0.02 295)" />
+            <stop offset="0" stopColor="var(--metal-highlight)" />
+            <stop offset="1" stopColor="var(--secondary)" />
           </linearGradient>
         </defs>
-        <rect x="4" y="6" width="112" height="112" rx="28" fill="oklch(0.3 0.03 290 / 0.35)" />
+        <rect x="4" y="6" width="112" height="112" rx="28" fill="var(--lo)" />
         <rect x="4" y="2" width="112" height="112" rx="28" fill="url(#tr-rim)" />
         <rect x="12" y="10" width="96" height="96" rx="21" fill="url(#tr-face)" />
-        <rect x="12" y="10" width="96" height="96" rx="21" fill="none" stroke="oklch(0.25 0.1 295 / 0.6)" strokeWidth="1.5" />
+        <rect x="12" y="10" width="96" height="96" rx="21" fill="none" stroke="var(--purple-edge)" strokeWidth="1.5" />
         {/* routing glyph: three upstream lines merging into one */}
         <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <g stroke="oklch(0.22 0.1 295 / 0.7)" strokeWidth="9" transform="translate(0 2)">
+          <g stroke="var(--purple-edge)" strokeWidth="9" transform="translate(0 2)">
             <path d="M32 36 H52 Q60 36 64 46 L66 58 H90" />
             <path d="M32 58 H90" />
             <path d="M32 80 H52 Q60 80 64 70 L66 58" />
@@ -43,20 +43,14 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
             <path d="M32 80 H52 Q60 80 64 70 L66 58" />
           </g>
         </g>
-        <circle cx="90" cy="58" r="8" fill="url(#tr-chrome)" stroke="oklch(0.3 0.1 295)" strokeWidth="1.5" />
+        <circle cx="90" cy="58" r="8" fill="url(#tr-chrome)" stroke="var(--purple-edge)" strokeWidth="1.5" />
       </svg>
       <div className="leading-none">
         <div
           className={cn(
-            "font-display font-black tracking-tight",
-            xl ? "text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem]" : "text-xl",
+            "font-display font-black engraved",
+            xl ? "logo-wordmark" : "text-xl",
           )}
-          style={{
-            color: "var(--foreground)",
-            textShadow: xl
-              ? "0 2px 0 oklch(1 0 0 / 0.8), 0 -1px 0 oklch(0.3 0.03 290 / 0.4)"
-              : "0 1px 0 oklch(1 0 0 / 0.8)",
-          }}
         >
           tope<span className="text-primary">router</span>
         </div>
