@@ -226,11 +226,11 @@ export function Keys() {
         {error ? <Empty>Unable to load keys. Please try again.</Empty> : isLoading ? <Empty>Loading…</Empty> : !keys.length && <Empty>No keys yet.</Empty>}
         {keys.map((k) => (
           <div key={k.id} className="well flex flex-wrap items-center justify-between gap-3 p-3">
-            <div className="flex items-center gap-3">
-              <span className={cn("led", k.revoked ? "led-bad" : "led-ok")} />
-              <div>
-                <div className="font-semibold">{k.name}</div>
-                <div className="font-mono text-xs text-muted-foreground">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <span className={cn("led shrink-0", k.revoked ? "led-bad" : "led-ok")} />
+              <div className="min-w-0">
+                <div className="break-words font-semibold">{k.name}</div>
+                <div className="break-words font-mono text-xs text-muted-foreground">
                   {k.key_prefix}… · last used {k.last_used_at ? new Date(k.last_used_at).toLocaleString() : "never"}
                 </div>
               </div>
@@ -239,7 +239,7 @@ export function Keys() {
           </div>
         ))}
       </div>
-      <div className="well mt-6 p-4 font-mono text-xs">
+      <div className="well mt-6 break-all p-4 font-mono text-xs">
         <div className="label-plate mb-2">Endpoint</div>
         <div>POST {typeof window !== "undefined" ? window.location.origin : ""}/api/public/v1/chat/completions</div>
         <div>GET&nbsp; {typeof window !== "undefined" ? window.location.origin : ""}/api/public/v1/models</div>
