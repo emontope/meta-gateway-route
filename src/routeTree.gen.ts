@@ -12,7 +12,19 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedGatewaysRouteImport } from './routes/_authenticated/gateways'
+import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authenticated/playground'
+import { Route as AuthenticatedRoutingRouteImport } from './routes/_authenticated/routing'
+import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated/usage'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsClaudeCodeRouteImport } from './routes/docs.claude-code'
+import { Route as DocsCodexCliRouteImport } from './routes/docs.codex-cli'
+import { Route as DocsHermesAgentRouteImport } from './routes/docs.hermes-agent'
+import { Route as DocsOpencodeRouteImport } from './routes/docs.opencode'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
@@ -30,10 +42,70 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGatewaysRoute = AuthenticatedGatewaysRouteImport.update({
+  id: '/gateways',
+  path: '/gateways',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlaygroundRoute = AuthenticatedPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRoutingRoute = AuthenticatedRoutingRouteImport.update({
+  id: '/routing',
+  path: '/routing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsageRoute = AuthenticatedUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsClaudeCodeRoute = DocsClaudeCodeRouteImport.update({
+  id: '/claude-code',
+  path: '/claude-code',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCodexCliRoute = DocsCodexCliRouteImport.update({
+  id: '/codex-cli',
+  path: '/codex-cli',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsHermesAgentRoute = DocsHermesAgentRouteImport.update({
+  id: '/hermes-agent',
+  path: '/hermes-agent',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsOpencodeRoute = DocsOpencodeRouteImport.update({
+  id: '/opencode',
+  path: '/opencode',
+  getParentRoute: () => DocsRoute,
 } as any)
 const ApiPublicV1ModelsRoute = ApiPublicV1ModelsRouteImport.update({
   id: '/api/public/v1/models',
@@ -50,14 +122,37 @@ const ApiPublicV1ChatCompletionsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/api-keys': typeof AuthenticatedApiKeysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
+  '/routing': typeof AuthenticatedRoutingRoute
+  '/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/terms': typeof TermsRoute
+  '/api-keys': typeof AuthenticatedApiKeysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
+  '/routing': typeof AuthenticatedRoutingRoute
+  '/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
+  '/docs': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -66,7 +161,19 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/gateways': typeof AuthenticatedGatewaysRoute
+  '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
+  '/_authenticated/routing': typeof AuthenticatedRoutingRoute
+  '/_authenticated/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -75,14 +182,37 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/docs'
+    | '/terms'
+    | '/api-keys'
     | '/dashboard'
+    | '/gateways'
+    | '/playground'
+    | '/routing'
+    | '/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
+    | '/docs/'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/terms'
+    | '/api-keys'
     | '/dashboard'
+    | '/gateways'
+    | '/playground'
+    | '/routing'
+    | '/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
+    | '/docs'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   id:
@@ -90,7 +220,19 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/docs'
+    | '/terms'
+    | '/_authenticated/api-keys'
     | '/_authenticated/dashboard'
+    | '/_authenticated/gateways'
+    | '/_authenticated/playground'
+    | '/_authenticated/routing'
+    | '/_authenticated/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
+    | '/docs/'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
@@ -99,6 +241,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DocsRoute: typeof DocsRouteWithChildren
+  TermsRoute: typeof TermsRoute
   ApiPublicV1ModelsRoute: typeof ApiPublicV1ModelsRoute
   ApiPublicV1ChatCompletionsRoute: typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -126,12 +270,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/api-keys': {
+      id: '/_authenticated/api-keys'
+      path: '/api-keys'
+      fullPath: '/api-keys'
+      preLoaderRoute: typeof AuthenticatedApiKeysRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gateways': {
+      id: '/_authenticated/gateways'
+      path: '/gateways'
+      fullPath: '/gateways'
+      preLoaderRoute: typeof AuthenticatedGatewaysRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/playground': {
+      id: '/_authenticated/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof AuthenticatedPlaygroundRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/routing': {
+      id: '/_authenticated/routing'
+      path: '/routing'
+      fullPath: '/routing'
+      preLoaderRoute: typeof AuthenticatedRoutingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usage': {
+      id: '/_authenticated/usage'
+      path: '/usage'
+      fullPath: '/usage'
+      preLoaderRoute: typeof AuthenticatedUsageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/claude-code': {
+      id: '/docs/claude-code'
+      path: '/claude-code'
+      fullPath: '/docs/claude-code'
+      preLoaderRoute: typeof DocsClaudeCodeRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/codex-cli': {
+      id: '/docs/codex-cli'
+      path: '/codex-cli'
+      fullPath: '/docs/codex-cli'
+      preLoaderRoute: typeof DocsCodexCliRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/hermes-agent': {
+      id: '/docs/hermes-agent'
+      path: '/hermes-agent'
+      fullPath: '/docs/hermes-agent'
+      preLoaderRoute: typeof DocsHermesAgentRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/opencode': {
+      id: '/docs/opencode'
+      path: '/opencode'
+      fullPath: '/docs/opencode'
+      preLoaderRoute: typeof DocsOpencodeRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/api/public/v1/models': {
       id: '/api/public/v1/models'
@@ -151,20 +379,50 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGatewaysRoute: typeof AuthenticatedGatewaysRoute
+  AuthenticatedPlaygroundRoute: typeof AuthenticatedPlaygroundRoute
+  AuthenticatedRoutingRoute: typeof AuthenticatedRoutingRoute
+  AuthenticatedUsageRoute: typeof AuthenticatedUsageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGatewaysRoute: AuthenticatedGatewaysRoute,
+  AuthenticatedPlaygroundRoute: AuthenticatedPlaygroundRoute,
+  AuthenticatedRoutingRoute: AuthenticatedRoutingRoute,
+  AuthenticatedUsageRoute: AuthenticatedUsageRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface DocsRouteChildren {
+  DocsClaudeCodeRoute: typeof DocsClaudeCodeRoute
+  DocsCodexCliRoute: typeof DocsCodexCliRoute
+  DocsHermesAgentRoute: typeof DocsHermesAgentRoute
+  DocsOpencodeRoute: typeof DocsOpencodeRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsClaudeCodeRoute: DocsClaudeCodeRoute,
+  DocsCodexCliRoute: DocsCodexCliRoute,
+  DocsHermesAgentRoute: DocsHermesAgentRoute,
+  DocsOpencodeRoute: DocsOpencodeRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DocsRoute: DocsRouteWithChildren,
+  TermsRoute: TermsRoute,
   ApiPublicV1ModelsRoute: ApiPublicV1ModelsRoute,
   ApiPublicV1ChatCompletionsRoute: ApiPublicV1ChatCompletionsRoute,
 }

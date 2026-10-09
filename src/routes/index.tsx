@@ -1,60 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpRight, BookOpen, Cable, KeyRound, ArrowLeftRight } from "lucide-react";
 import { Logo } from "@/components/Logo";
-
+import { Button } from "@/components/ui/button";
+import { CodeSnippet } from "@/components/CodeSnippet";
+import { pageMeta } from "@/lib/page-meta";
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Toperouter — One key for every AI gateway" },
-      { name: "description", content: "Aggregate OpenRouter, ZenMux, DeepInfra, Together and more behind one OpenAI-compatible API key." },
-      { property: "og:title", content: "Toperouter — AI Meta-Gateway" },
-      { property: "og:description", content: "Bring your gateway keys, get one unified OpenAI-compatible endpoint with failover and latency tests." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => pageMeta("One key for every AI gateway", "Bring your OpenRouter, ZenMux, DeepInfra, and other gateway keys into one OpenAI-compatible API with routing, live connection tests, and usage logs."),
   component: Index,
 });
-
-const layers = [
-  { t: "Toperouter", d: "One key. One endpoint. OpenAI-compatible /v1/chat/completions." },
-  { t: "Upstream gateways", d: "OpenRouter, ZenMux, DeepInfra, Together, Groq, Fireworks or any compatible URL — your keys." },
-  { t: "Models", d: "OpenAI, Anthropic, DeepSeek, Qwen, Llama — whatever your gateways serve." },
-];
-
 function Index() {
-  return (
-    <main className="min-h-screen px-4 py-10 md:py-16">
-      <div className="mx-auto max-w-6xl">
-        <section className="panel p-8 md:p-14">
-          <Logo size="xl" />
-          <p className="mt-10 max-w-2xl text-lg text-muted-foreground">
-            A meta-gateway that sits on top of the AI gateways you already pay for. Add their keys, test their latency,
-            and route every request through one Toperouter key with automatic failover.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/auth" className="btn btn-primary px-6 py-3 text-base">Open console</Link>
-            <a href="#how" className="btn px-6 py-3 text-base">How it works</a>
-          </div>
-        </section>
-
-        <section id="how" className="mt-8 grid gap-4 md:grid-cols-3">
-          {layers.map((l, i) => (
-            <div key={l.t} className="panel p-6">
-              <div className="label-plate">Layer 0{i + 1}</div>
-              <h2 className="mt-2 font-display text-xl font-bold">{l.t}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{l.d}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="panel mt-8 p-6">
-          <div className="label-plate mb-3">Drop-in usage</div>
-          <pre className="well overflow-x-auto p-4 font-mono text-xs leading-relaxed">{`curl https://<your-app>/api/public/v1/chat/completions \\
-  -H "Authorization: Bearer tr-..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"model":"openrouter/deepseek/deepseek-chat","messages":[{"role":"user","content":"hi"}]}'`}</pre>
-        </section>
-      </div>
-    </main>
-  );
+  return <main className="mx-auto max-w-7xl px-5 pt-12 sm:pt-16">
+    <section className="border-b pb-12">
+      <div className="label-plate mb-7">Independent gateways. Unified access.</div>
+      <h1><Logo size="xl" /></h1>
+      <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">The AI meta-gateway for the gateways you already use. Bring your keys. Route your models. Keep one connection.</p>
+      <div className="mt-7 flex flex-wrap gap-3"><Button asChild size="lg"><Link to="/dashboard">Open console<ArrowUpRight /></Link></Button><Button asChild variant="outline" size="lg"><Link to="/docs"><BookOpen />Read the docs</Link></Button></div>
+      <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-muted-foreground"><span>OPENROUTER</span><span>ZENMUX</span><span>DEEPINFRA</span><span>TOGETHER</span><span>GROQ</span><span>FIREWORKS</span></div>
+    </section>
+    <section className="grid gap-8 border-b py-9 sm:grid-cols-3">
+      {[
+        { title: "Bring your gateways", desc: "Connect your upstream keys and measure real connection latency.", icon: Cable },
+        { title: "Keep one API key", desc: "One OpenAI-compatible endpoint for your connected models.", icon: KeyRound },
+        { title: "Choose your route", desc: "Direct gateway targeting, model rules, and retryable-error failover.", icon: ArrowLeftRight },
+      ].map(({ title, desc, icon: Icon }, i) => <div key={title}><div className="mb-4 flex items-center justify-between"><Icon className="text-primary" size={22} /><span className="label-plate">0{i + 1}</span></div><h2 className="text-lg font-semibold">{title}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{desc}</p></div>)}
+    </section>
+    <section className="grid gap-8 py-9 lg:grid-cols-[1fr_1.25fr]"><div><div className="label-plate">Your next connection</div><h2 className="mt-3 font-display text-2xl font-bold">From console to terminal.</h2><p className="mt-4 text-sm leading-7 text-muted-foreground">Copyable setup guides for OpenCode, Hermes Agent, Claude Code, and Codex CLI—with clear notes about protocol compatibility.</p><Button asChild variant="outline" className="mt-5"><Link to="/docs">Explore setup guides<ArrowUpRight /></Link></Button></div><CodeSnippet label="OpenAI-compatible base URL" code="https://meta-gateway-route.lovable.app/api/public/v1" /></section>
+  </main>;
 }
