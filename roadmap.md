@@ -1,5 +1,5 @@
 # Requested work
-- [ ] Add public docs and copyable setup guides for OpenCode, Claude Code, Hermes Agent, and Codex CLI.
-- [ ] Separate dashboard, API keys, gateways, routing, playground, and usage views with working navigation.
-- [ ] Add Terms of Service with legal-review caveat.
-- [ ] Refresh tactile gray/purple styling and verify navigation, copying, and live signed-in views.
+- [x] Add public docs and copyable setup guides for OpenCode, Claude Code, Hermes Agent, and Codex CLI; label protocol limitations and external adapter requirements.
+- [x] Separate dashboard, API keys, gateways, routing, playground, and usage views with working navigation.
+- [x] Add Terms of Service as a clearly labeled draft for legal review.
+- [x] Refresh tactile gray/purple styling; verify copying, signed-in key generation/revocation, real Groq request and usage readback, desktop/mobile layouts, and 13 routing tests.
