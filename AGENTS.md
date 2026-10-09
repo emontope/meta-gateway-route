@@ -15,3 +15,5 @@
 - The OpenAI-compatible proxy lives under `/api/public/v1/*` and authenticates by SHA-256 hash of the `tr-` key — public prefix is required to bypass site auth for external callers.
 - Routing order: `slug/model` prefix → routing_rules by priority → enabled gateways by last latency; fail over on 429/5xx — keeps behavior predictable.
 - Skeuomorphic styling lives in `src/styles.css` component classes (`panel`, `well`, `btn`, `field`, `led`) — reuse them instead of ad-hoc shadows.
+- Console features use dedicated authenticated routes and shared ConsoleShell/ConsoleViews modules — keeps navigation deep-linkable without duplicating management logic.
+- Public setup guides live under a `/docs` Outlet layout with per-guide metadata and shared copy controls — keeps configurations shareable and reusable.

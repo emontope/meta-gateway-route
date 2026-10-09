@@ -21,6 +21,10 @@ import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRoutingRouteImport } from './routes/_authenticated/routing'
 import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated/usage'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsClaudeCodeRouteImport } from './routes/docs.claude-code'
+import { Route as DocsCodexCliRouteImport } from './routes/docs.codex-cli'
+import { Route as DocsHermesAgentRouteImport } from './routes/docs.hermes-agent'
+import { Route as DocsOpencodeRouteImport } from './routes/docs.opencode'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
@@ -83,6 +87,26 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRoute,
 } as any)
+const DocsClaudeCodeRoute = DocsClaudeCodeRouteImport.update({
+  id: '/claude-code',
+  path: '/claude-code',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCodexCliRoute = DocsCodexCliRouteImport.update({
+  id: '/codex-cli',
+  path: '/codex-cli',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsHermesAgentRoute = DocsHermesAgentRouteImport.update({
+  id: '/hermes-agent',
+  path: '/hermes-agent',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsOpencodeRoute = DocsOpencodeRouteImport.update({
+  id: '/opencode',
+  path: '/opencode',
+  getParentRoute: () => DocsRoute,
+} as any)
 const ApiPublicV1ModelsRoute = ApiPublicV1ModelsRouteImport.update({
   id: '/api/public/v1/models',
   path: '/api/public/v1/models',
@@ -106,6 +130,10 @@ export interface FileRoutesByFullPath {
   '/playground': typeof AuthenticatedPlaygroundRoute
   '/routing': typeof AuthenticatedRoutingRoute
   '/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
@@ -120,6 +148,10 @@ export interface FileRoutesByTo {
   '/playground': typeof AuthenticatedPlaygroundRoute
   '/routing': typeof AuthenticatedRoutingRoute
   '/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
   '/docs': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
@@ -137,6 +169,10 @@ export interface FileRoutesById {
   '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
   '/_authenticated/routing': typeof AuthenticatedRoutingRoute
   '/_authenticated/usage': typeof AuthenticatedUsageRoute
+  '/docs/claude-code': typeof DocsClaudeCodeRoute
+  '/docs/codex-cli': typeof DocsCodexCliRoute
+  '/docs/hermes-agent': typeof DocsHermesAgentRoute
+  '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
@@ -154,6 +190,10 @@ export interface FileRouteTypes {
     | '/playground'
     | '/routing'
     | '/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
     | '/docs/'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
@@ -168,6 +208,10 @@ export interface FileRouteTypes {
     | '/playground'
     | '/routing'
     | '/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
     | '/docs'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
@@ -184,6 +228,10 @@ export interface FileRouteTypes {
     | '/_authenticated/playground'
     | '/_authenticated/routing'
     | '/_authenticated/usage'
+    | '/docs/claude-code'
+    | '/docs/codex-cli'
+    | '/docs/hermes-agent'
+    | '/docs/opencode'
     | '/docs/'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
@@ -285,6 +333,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/claude-code': {
+      id: '/docs/claude-code'
+      path: '/claude-code'
+      fullPath: '/docs/claude-code'
+      preLoaderRoute: typeof DocsClaudeCodeRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/codex-cli': {
+      id: '/docs/codex-cli'
+      path: '/codex-cli'
+      fullPath: '/docs/codex-cli'
+      preLoaderRoute: typeof DocsCodexCliRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/hermes-agent': {
+      id: '/docs/hermes-agent'
+      path: '/hermes-agent'
+      fullPath: '/docs/hermes-agent'
+      preLoaderRoute: typeof DocsHermesAgentRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/opencode': {
+      id: '/docs/opencode'
+      path: '/opencode'
+      fullPath: '/docs/opencode'
+      preLoaderRoute: typeof DocsOpencodeRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/api/public/v1/models': {
       id: '/api/public/v1/models'
       path: '/api/public/v1/models'
@@ -324,10 +400,18 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface DocsRouteChildren {
+  DocsClaudeCodeRoute: typeof DocsClaudeCodeRoute
+  DocsCodexCliRoute: typeof DocsCodexCliRoute
+  DocsHermesAgentRoute: typeof DocsHermesAgentRoute
+  DocsOpencodeRoute: typeof DocsOpencodeRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
+  DocsClaudeCodeRoute: DocsClaudeCodeRoute,
+  DocsCodexCliRoute: DocsCodexCliRoute,
+  DocsHermesAgentRoute: DocsHermesAgentRoute,
+  DocsOpencodeRoute: DocsOpencodeRoute,
   DocsIndexRoute: DocsIndexRoute,
 }
 
