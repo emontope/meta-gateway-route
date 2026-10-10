@@ -8,6 +8,8 @@ import { createApiKey, createGateway, listGatewayModels, testGateway } from "@/l
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CodeSnippet } from "@/components/CodeSnippet";
+import { ListSkeleton, UsageSkeleton } from "@/components/ConsoleSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function useGateways() {
   return useQuery({
@@ -138,7 +140,7 @@ export function Gateways() {
 
       <Section title="Upstream gateways">
         {error ? <Empty>Unable to load gateways. Please try again.</Empty> : isLoading ? (
-          <Empty>Loading…</Empty>
+          <ListSkeleton />
         ) : !gws.length ? (
           <Empty>No gateways yet. Connect your first one on the left.</Empty>
         ) : (
@@ -223,9 +225,9 @@ export function Keys() {
       </form>
       {fresh && <div className="mt-5"><div className="label-plate">Copy now — shown only once</div><CodeSnippet code={fresh} label="New API key" /><Button variant="outline" onClick={() => setFresh(null)}>Dismiss key</Button></div>}
       <div className="mt-5 space-y-2">
-        {error ? <Empty>Unable to load keys. Please try again.</Empty> : isLoading ? <Empty>Loading…</Empty> : !keys.length && <Empty>No keys yet.</Empty>}
+        {error ? <Empty>Unable to load keys. Please try again.</Empty> : isLoading ? <ListSkeleton /> : !keys.length && <Empty>No keys yet.</Empty>}
         {keys.map((k) => (
-          <div key={k.id} className="well flex flex-wrap items-center justify-between gap-3 p-3">
+          <div key={k.id} className="well content-reveal flex flex-wrap items-center justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <span className={cn("led shrink-0", k.revoked ? "led-bad" : "led-ok")} />
               <div className="min-w-0">
@@ -402,13 +404,13 @@ export function Usage() {
   return (
     <Section title="Usage log">
       <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4 font-mono text-xs">
-        <Stat k="Requests" v={logs.length} />
-        <Stat k="Success" v={logs.length ? `${Math.round((ok.length / logs.length) * 100)}%` : "—"} />
-        <Stat k="Avg latency" v={avg != null ? `${avg} ms` : "—"} />
-        <Stat k="Tokens" v={tokens.toLocaleString()} />
+        <Stat k="Requests" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : logs.length} />
+        <Stat k="Success" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : logs.length ? `${Math.round((ok.length / logs.length) * 100)}%` : "—"} />
+        <Stat k="Avg latency" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : avg != null ? `${avg} ms` : "—"} />
+        <Stat k="Tokens" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : tokens.toLocaleString()} />
       </div>
-      {error ? <Empty>Unable to load usage logs. Please try again.</Empty> : isLoading ? <Empty>Loading…</Empty> : !logs.length ? <Empty>No requests yet. Try the Playground.</Empty> : (
-        <div className="well overflow-x-auto">
+      {error ? <Empty>Unable to load usage logs. Please try again.</Empty> : isLoading ? <UsageSkeleton /> : !logs.length ? <Empty>No requests yet. Try the Playground.</Empty> : (
+        <div className="well content-reveal overflow-x-auto">
           <table className="w-full font-mono text-xs">
             <thead><tr className="text-left">
               {["Time", "Model", "Gateway", "Status", "Latency", "Tokens"].map((h) => <th key={h} className="label-plate px-3 py-2">{h}</th>)}

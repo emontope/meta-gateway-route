@@ -4,6 +4,7 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { CodeSnippet } from "@/components/CodeSnippet";
 import { pageMeta } from "@/lib/page-meta";
+import { ProviderMatrix } from "@/components/ProviderMatrix";
 export const Route = createFileRoute("/")({
   head: () => pageMeta("One key for every AI gateway", "Bring your OpenRouter, ZenMux, DeepInfra, and other gateway keys into one OpenAI-compatible API with routing, live connection tests, and usage logs."),
   component: Index,
@@ -13,9 +14,19 @@ function Index() {
     <section className="border-b pb-12">
       <div className="label-plate mb-7">Independent gateways. Unified access.</div>
       <h1><Logo size="xl" /></h1>
-      <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">The AI meta-gateway for the gateways you already use. Bring your keys. Route your models. Keep one connection.</p>
+      <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">Your gateway above the gateways. Connect your existing accounts, choose where each model runs, and give every tool one consistent API.</p>
+      <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Toperouter brings your own upstream keys together—not a new model subscription. Your providers handle inference and billing; you control routing, credentials, and request visibility here.</p>
       <div className="mt-7 flex flex-wrap gap-3"><Button asChild size="lg"><Link to="/dashboard">Open console<ArrowUpRight /></Link></Button><Button asChild variant="outline" size="lg"><Link to="/docs"><BookOpen />Read the docs</Link></Button></div>
       <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-muted-foreground"><span>OPENROUTER</span><span>ZENMUX</span><span>DEEPINFRA</span><span>TOGETHER</span><span>GROQ</span><span>FIREWORKS</span></div>
+    </section>
+    <ProviderMatrix />
+    <section className="border-t py-9">
+      <div className="label-plate">The request path</div><h2 className="mt-3 font-display text-2xl font-bold">You choose the route. We connect the layers.</h2>
+      <div className="mt-7 grid gap-7 md:grid-cols-3">{[
+        ["01 / Your client", "One Toperouter key", "Your app or compatible coding tool sends a Chat Completions request using a tr- key. Upstream credentials stay server-side."],
+        ["02 / Your gateway", "Predictable routing", "A gateway/model prefix targets a gateway directly. Otherwise rules run by priority, then enabled gateways are ordered by measured latency."],
+        ["03 / Your model", "Real request visibility", "The selected provider runs inference. Retryable 429 and 5xx errors can fail over when alternatives exist; usage logs record status, latency, and tokens."],
+      ].map(([number, title, text]) => <div className="route-step" key={number}><div className="label-plate">{number}</div><h3 className="mt-3 font-semibold">{title}</h3><p className="mt-2 text-sm leading-7 text-muted-foreground">{text}</p></div>)}</div>
     </section>
     <section className="grid gap-8 border-b py-9 sm:grid-cols-3">
       {[
