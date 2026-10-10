@@ -34,7 +34,7 @@ export function ConsoleShell({ title, description, children }: { title: string; 
         <Button variant="ghost" onClick={signOut} className="justify-start"><LogOut />Sign out</Button>
       </div>
     </aside>
-    <div className="min-w-0">
+    <div className="content-reveal min-w-0">
       <div className="mb-7"><div className="label-plate mb-2">Toperouter control room</div><h1 className="font-display text-2xl font-bold sm:text-3xl">{title}</h1><p className="mt-2 text-sm text-muted-foreground">{description}</p></div>
       {children}
     </div>

@@ -17,3 +17,5 @@
 - Skeuomorphic styling lives in `src/styles.css` component classes (`panel`, `well`, `btn`, `field`, `led`) — reuse them instead of ad-hoc shadows.
 - Console features use dedicated authenticated routes and shared ConsoleShell/ConsoleViews modules — keeps navigation deep-linkable without duplicating management logic.
 - Public setup guides live under a `/docs` Outlet layout with per-guide metadata and shared copy controls — keeps configurations shareable and reusable.
+- ProviderMatrix uses externalized authentic brand marks and explicitly separates model-family identity from live availability — prevents logos from implying a configured connection.
+- Console loading uses shared list/table skeletons and the semantic Skeleton primitive — preserves layout while real records load without introducing mock data.
