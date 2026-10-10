@@ -22,8 +22,8 @@ export function Logo({ size = "sm", className }: { size?: "sm" | "xl"; className
             <stop offset="1" stopColor="var(--purple-edge)" />
           </linearGradient>
           <linearGradient id="tr-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="90">
-            <stop offset="0" stopColor="var(--metal-highlight)" />
-            <stop offset="1" stopColor="var(--secondary)" />
+            <stop offset="0" stopColor="var(--foreground)" />
+            <stop offset="1" stopColor="var(--muted-foreground)" />
           </linearGradient>
         </defs>
         <rect x="4" y="6" width="112" height="112" rx="28" fill="var(--lo)" />
