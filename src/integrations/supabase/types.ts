@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_login_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          ip: string
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ip: string
+          success: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ip?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          ip: string | null
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          ip?: string | null
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          ip?: string | null
+          token_hash?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -47,6 +89,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       gateways: {
         Row: {
           api_key: string
@@ -62,7 +122,7 @@ export type Database = {
           name: string
           provider: string
           slug: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           api_key: string
@@ -78,7 +138,7 @@ export type Database = {
           name: string
           provider: string
           slug: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           api_key?: string
@@ -94,9 +154,181 @@ export type Database = {
           name?: string
           provider?: string
           slug?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
+      }
+      login_sessions: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          status: string
+          telegram_id: number | null
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          status?: string
+          telegram_id?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          status?: string
+          telegram_id?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      models: {
+        Row: {
+          created_at: string
+          display_name: string
+          enabled: boolean
+          gateway_id: string
+          id: string
+          input_rate: number
+          is_free: boolean
+          output_rate: number
+          priority: number
+          slug: string
+          upstream_model: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          enabled?: boolean
+          gateway_id: string
+          id?: string
+          input_rate?: number
+          is_free?: boolean
+          output_rate?: number
+          priority?: number
+          slug: string
+          upstream_model: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          enabled?: boolean
+          gateway_id?: string
+          id?: string
+          input_rate?: number
+          is_free?: boolean
+          output_rate?: number
+          priority?: number
+          slug?: string
+          upstream_model?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "models_gateway_id_fkey"
+            columns: ["gateway_id"]
+            isOneToOne: false
+            referencedRelation: "gateways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          blocked: boolean
+          created_at: string
+          display_name: string | null
+          id: string
+          telegram_id: number | null
+          telegram_username: string | null
+          token_balance: number
+        }
+        Insert: {
+          blocked?: boolean
+          created_at?: string
+          display_name?: string | null
+          id: string
+          telegram_id?: number | null
+          telegram_username?: string | null
+          token_balance?: number
+        }
+        Update: {
+          blocked?: boolean
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          telegram_id?: number | null
+          telegram_username?: string | null
+          token_balance?: number
+        }
+        Relationships: []
+      }
+      redeem_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_uses: number
+          tokens: number
+          uses: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          tokens: number
+          uses?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          tokens?: number
+          uses?: number
+        }
+        Relationships: []
+      }
+      redemptions: {
+        Row: {
+          code_id: string
+          created_at: string
+          id: string
+          tokens: number
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          created_at?: string
+          id?: string
+          tokens: number
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          created_at?: string
+          id?: string
+          tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "redeem_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       routing_rules: {
         Row: {
@@ -136,10 +368,53 @@ export type Database = {
           },
         ]
       }
+      topup_requests: {
+        Row: {
+          admin_note: string | null
+          amount: string
+          created_at: string
+          id: string
+          method: string
+          reviewed_at: string | null
+          status: string
+          tokens_granted: number | null
+          tokens_requested: number | null
+          tx_ref: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: string
+          created_at?: string
+          id?: string
+          method: string
+          reviewed_at?: string | null
+          status?: string
+          tokens_granted?: number | null
+          tokens_requested?: number | null
+          tx_ref: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: string
+          created_at?: string
+          id?: string
+          method?: string
+          reviewed_at?: string | null
+          status?: string
+          tokens_granted?: number | null
+          tokens_requested?: number | null
+          tx_ref?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_logs: {
         Row: {
           api_key_id: string | null
           completion_tokens: number | null
+          cost_tokens: number
           created_at: string
           error: string | null
           gateway_id: string | null
@@ -156,6 +431,7 @@ export type Database = {
         Insert: {
           api_key_id?: string | null
           completion_tokens?: number | null
+          cost_tokens?: number
           created_at?: string
           error?: string | null
           gateway_id?: string | null
@@ -172,6 +448,7 @@ export type Database = {
         Update: {
           api_key_id?: string | null
           completion_tokens?: number | null
+          cost_tokens?: number
           created_at?: string
           error?: string | null
           gateway_id?: string | null
@@ -192,7 +469,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      adjust_tokens: { Args: { _delta: number; _uid: string }; Returns: number }
+      charge_tokens: {
+        Args: { _amount: number; _uid: string }
+        Returns: number
+      }
+      redeem_code: { Args: { _code: string; _uid: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
