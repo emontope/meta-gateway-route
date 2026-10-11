@@ -102,7 +102,7 @@ export const adminSaveGateway = createServerFn({ method: "POST" })
     return { ...d, name: d.name.trim().slice(0, 60), baseUrl: d.baseUrl.trim(), apiKey: d.apiKey?.trim() };
   })
   .handler(async ({ data, context }) => {
-    const row: Record<string, unknown> = { name: data.name, slug: slugify(data.name), provider: data.provider || "custom", base_url: data.baseUrl };
+    const row: { name: string; slug: string; provider: string; base_url: string; api_key?: string; enabled?: boolean } = { name: data.name, slug: slugify(data.name), provider: data.provider || "custom", base_url: data.baseUrl };
     if (data.apiKey) row["api_key"] = data.apiKey;
     if (data.enabled !== undefined) row["enabled"] = data.enabled;
     const q = data.id
