@@ -3,33 +3,60 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { GATEWAY_PRESETS } from "@/lib/gateway-presets";
-import { createApiKey, createGateway, listGatewayModels, testGateway } from "@/lib/toperouter.functions";
+import { redeemCode, regenerateApiKey, submitTopup } from "@/lib/toperouter.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CodeSnippet } from "@/components/CodeSnippet";
 import { ListSkeleton, UsageSkeleton } from "@/components/ConsoleSkeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function useGateways() {
+export const fmt = (n: number | null | undefined) => (n ?? 0).toLocaleString();
+
+export function useProfile() {
   return useQuery({
-    queryKey: ["gateways"],
+    queryKey: ["profile"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gateways")
-        .select("id,name,slug,provider,base_url,enabled,last_status,last_latency_ms,last_model_count,last_error,last_tested_at,created_at")
-        .order("created_at");
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not signed in");
+      const { data, error } = await supabase.from("profiles").select("id,telegram_username,display_name,token_balance,blocked,created_at").eq("id", u.user.id).maybeSingle();
       if (error) throw error;
       return data;
     },
   });
 }
 
-function Empty({ children }: { children: React.ReactNode }) {
+export function usePublicModels() {
+  return useQuery({
+    queryKey: ["models"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("models").select("id,slug,display_name,is_free,input_rate,output_rate").order("slug");
+      if (error) throw error;
+      const seen = new Set<string>();
+      return (data ?? []).filter((m) => (seen.has(m.slug) ? false : (seen.add(m.slug), true)));
+    },
+  });
+}
+
+export function useSettings() {
+  return useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("app_settings").select("key,value");
+      if (error) throw error;
+      const get = (k: string) => (data ?? []).find((r) => r.key === k)?.value as Record<string, unknown> | undefined;
+      return {
+        payments: (get("payments") ?? {}) as { bkash?: string; binance_pay_id?: string; wallets?: { network: string; address: string }[]; instructions?: string },
+        links: (get("links") ?? {}) as { channel?: string; group?: string },
+      };
+    },
+  });
+}
+
+export function Empty({ children }: { children: React.ReactNode }) {
   return <div className="well p-8 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
-function Section({ title, children, aside }: { title: string; children: React.ReactNode; aside?: React.ReactNode }) {
+export function Section({ title, children, aside }: { title: string; children: React.ReactNode; aside?: React.ReactNode }) {
   return (
     <section className="min-w-0">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -41,145 +68,7 @@ function Section({ title, children, aside }: { title: string; children: React.Re
   );
 }
 
-/* ---------------- Gateways ---------------- */
-export function Gateways() {
-  const qc = useQueryClient();
-  const { data: gws = [], isLoading, error } = useGateways();
-  const create = useServerFn(createGateway);
-  const test = useServerFn(testGateway);
-  const [preset, setPreset] = useState(GATEWAY_PRESETS[0] ?? { provider: "custom", name: "Custom", baseUrl: "", docs: "" });
-  const [name, setName] = useState(GATEWAY_PRESETS[0]?.name ?? "");
-  const [baseUrl, setBaseUrl] = useState(GATEWAY_PRESETS[0]?.baseUrl ?? "");
-  const [apiKey, setApiKey] = useState("");
-  const [testing, setTesting] = useState<string | null>(null);
-
-  const add = useMutation({
-    mutationFn: () => create({ data: { name, provider: preset.provider, baseUrl, apiKey } }),
-    onSuccess: async ({ id }) => {
-      setApiKey("");
-      toast.success("Gateway added — running connection test");
-      await qc.invalidateQueries({ queryKey: ["gateways"] });
-      runTest(id);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  async function runTest(id: string) {
-    setTesting(id);
-    try {
-      const r = await test({ data: { id } });
-      r.status === "ok"
-        ? toast.success(`Connected in ${r.latency} ms · ${r.count} models`)
-        : toast.error(r.error ?? "Connection failed");
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setTesting(null);
-      qc.invalidateQueries({ queryKey: ["gateways"] });
-    }
-  }
-
-  async function toggle(id: string, enabled: boolean) {
-    const { error } = await supabase.from("gateways").update({ enabled }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["gateways"] });
-  }
-  async function remove(id: string) {
-    if (!confirm("Remove this gateway and its routing rules?")) return;
-    const { error } = await supabase.from("gateways").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["gateways"] });
-  }
-
-  return (
-    <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
-      <Section title="Connect gateway">
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            add.mutate();
-          }}
-        >
-          <label className="block">
-            <span className="label-plate">Provider</span>
-            <select
-              className="field mt-1"
-              value={preset.provider}
-              onChange={(e) => {
-                const p = GATEWAY_PRESETS.find((x) => x.provider === e.target.value);
-                if (!p) return;
-                setPreset(p);
-                setName(p.provider === "custom" ? "" : p.name);
-                setBaseUrl(p.baseUrl);
-              }}
-            >
-              {GATEWAY_PRESETS.map((p) => (
-                <option key={p.provider} value={p.provider}>{p.name}</option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="label-plate">Name</span>
-            <input className="field mt-1" value={name} onChange={(e) => setName(e.target.value)} required />
-          </label>
-          <label className="block">
-            <span className="label-plate">Base URL</span>
-            <input className="field mt-1" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://…/v1" required />
-          </label>
-          <label className="block">
-            <span className="label-plate">API key</span>
-            <input className="field mt-1" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={preset.docs ? `from ${preset.docs}` : "sk-…"} required />
-          </label>
-          <Button variant="outline" className="btn btn-primary w-full" disabled={add.isPending}>
-            {add.isPending ? "Saving…" : "Add & test"}
-          </Button>
-          <p className="text-xs text-muted-foreground">Keys are stored server-side and never returned to the browser.</p>
-        </form>
-      </Section>
-
-      <Section title="Upstream gateways">
-        {error ? <Empty>Unable to load gateways. Please try again.</Empty> : isLoading ? (
-          <ListSkeleton />
-        ) : !gws.length ? (
-          <Empty>No gateways yet. Connect your first one on the left.</Empty>
-        ) : (
-          <ul className="space-y-3">
-            {gws.map((g) => (
-              <li key={g.id} className="well p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className={cn("led", g.last_status === "ok" && "led-ok", g.last_status === "error" && "led-bad")} />
-                    <div>
-                      <div className="font-semibold">{g.name} <span className="font-mono text-xs text-muted-foreground">/{g.slug}</span></div>
-                      <div className="break-all font-mono text-xs text-muted-foreground">{g.base_url}</div>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" className="btn" onClick={() => runTest(g.id)} disabled={testing === g.id}>
-                      {testing === g.id ? "Testing…" : "Test"}
-                    </Button>
-                    <Button variant="outline" className="btn" onClick={() => toggle(g.id, !g.enabled)}>{g.enabled ? "Disable" : "Enable"}</Button>
-                    <Button variant="outline" className="btn btn-danger" onClick={() => remove(g.id)}>Remove</Button>
-                  </div>
-                </div>
-                <div className="mt-3 grid grid-cols-3 gap-2 font-mono text-xs">
-                  <Stat k="Latency" v={g.last_latency_ms != null ? `${g.last_latency_ms} ms` : "—"} />
-                  <Stat k="Models" v={g.last_model_count ?? "—"} />
-                  <Stat k="Tested" v={g.last_tested_at ? new Date(g.last_tested_at).toLocaleTimeString() : "never"} />
-                </div>
-                {g.last_error && <p className="mt-2 break-all font-mono text-xs text-destructive">{g.last_error}</p>}
-                {!g.enabled && <p className="mt-2 label-plate">disabled — skipped by router</p>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-    </div>
-  );
-}
-
-function Stat({ k, v }: { k: string; v: React.ReactNode }) {
+export function Stat({ k, v }: { k: string; v: React.ReactNode }) {
   return (
     <div className="stat-readout px-3 py-4">
       <div className="label-plate">{k}</div>
@@ -188,148 +77,157 @@ function Stat({ k, v }: { k: string; v: React.ReactNode }) {
   );
 }
 
-/* ---------------- Keys ---------------- */
+/* ---------------- Single API key ---------------- */
 export function Keys() {
   const qc = useQueryClient();
-  const make = useServerFn(createApiKey);
-  const [name, setName] = useState("");
+  const regen = useServerFn(regenerateApiKey);
   const [fresh, setFresh] = useState<string | null>(null);
-  const { data: keys = [], isLoading, error } = useQuery({
+  const { data: key, isLoading, error } = useQuery({
     queryKey: ["keys"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("api_keys").select("id,name,key_prefix,revoked,last_used_at,created_at").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("api_keys").select("id,key_prefix,last_used_at,created_at").eq("revoked", false).order("created_at", { ascending: false }).limit(1);
       if (error) throw error;
-      return data;
+      return data?.[0] ?? null;
     },
   });
-  const add = useMutation({
-    mutationFn: () => make({ data: { name } }),
-    onSuccess: ({ key }) => {
-      setFresh(key);
-      setName("");
-      qc.invalidateQueries({ queryKey: ["keys"] });
-    },
+  const make = useMutation({
+    mutationFn: () => regen(),
+    onSuccess: ({ key }) => { setFresh(key); qc.invalidateQueries({ queryKey: ["keys"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
-  async function revoke(id: string) {
-    const { error } = await supabase.from("api_keys").update({ revoked: true }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["keys"] });
-  }
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   return (
-    <Section title="Toperouter API keys">
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate(); }}>
-        <input className="field max-w-xs" placeholder="Key name (e.g. production)" value={name} onChange={(e) => setName(e.target.value)} />
-        <Button variant="outline" className="btn btn-primary" disabled={add.isPending}>Generate key</Button>
-      </form>
-      {fresh && <div className="mt-5"><div className="label-plate">Copy now — shown only once</div><CodeSnippet code={fresh} label="New API key" /><Button variant="outline" onClick={() => setFresh(null)}>Dismiss key</Button></div>}
-      <div className="mt-5 space-y-2">
-        {error ? <Empty>Unable to load keys. Please try again.</Empty> : isLoading ? <ListSkeleton /> : !keys.length && <Empty>No keys yet.</Empty>}
-        {keys.map((k) => (
-          <div key={k.id} className="well content-reveal flex flex-wrap items-center justify-between gap-3 p-4">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <span className={cn("led shrink-0", k.revoked ? "led-bad" : "led-ok")} />
-              <div className="min-w-0">
-                <div className="break-words font-semibold">{k.name}</div>
-                <div className="break-words font-mono text-xs text-muted-foreground">
-                  {k.key_prefix}… · last used {k.last_used_at ? new Date(k.last_used_at).toLocaleString() : "never"}
-                </div>
-              </div>
-            </div>
-            {!k.revoked ? <Button variant="outline" className="btn btn-danger" onClick={() => revoke(k.id)}>Revoke</Button> : <span className="label-plate">revoked</span>}
-          </div>
-        ))}
-      </div>
+    <Section title="Your API key">
+      <p className="mb-4 text-sm text-muted-foreground">One key reaches every model on Toperouter. Generating a new key immediately disables the old one.</p>
+      {error ? <Empty>Unable to load your key. Please try again.</Empty> : isLoading ? <ListSkeleton rows={1} /> : key ? (
+        <div className="well content-reveal flex flex-wrap items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-3"><span className="led led-ok" /><div>
+            <div className="font-mono font-semibold">{key.key_prefix}…</div>
+            <div className="text-xs text-muted-foreground">Created {new Date(key.created_at).toLocaleDateString()} · last used {key.last_used_at ? new Date(key.last_used_at).toLocaleString() : "never"}</div>
+          </div></div>
+          <Button variant="outline" className="btn" disabled={make.isPending} onClick={() => confirm("Replace your key? Apps using the old key will stop working.") && make.mutate()}>Regenerate</Button>
+        </div>
+      ) : (
+        <Empty>You don't have a key yet.<div className="mt-4"><Button onClick={() => make.mutate()} disabled={make.isPending}>Generate my key</Button></div></Empty>
+      )}
+      {fresh && <div className="mt-5"><div className="label-plate">Copy now — shown only once</div><CodeSnippet code={fresh} label="Your API key" /><Button variant="outline" onClick={() => setFresh(null)}>I've saved it</Button></div>}
       <div className="well mt-6 break-all p-4 font-mono text-xs">
-        <div className="label-plate mb-2">Endpoint</div>
-        <div>POST {typeof window !== "undefined" ? window.location.origin : ""}/api/public/v1/chat/completions</div>
-        <div>GET&nbsp; {typeof window !== "undefined" ? window.location.origin : ""}/api/public/v1/models</div>
+        <div className="label-plate mb-2">OpenAI-compatible base URL</div>
+        <div>{origin}/api/public/v1</div>
       </div>
     </Section>
   );
 }
 
-/* ---------------- Routing ---------------- */
-export function Routing() {
-  const qc = useQueryClient();
-  const { data: gws = [] } = useGateways();
-  const [pattern, setPattern] = useState("");
-  const [gatewayId, setGatewayId] = useState("");
-  const [upstream, setUpstream] = useState("");
-  const [priority, setPriority] = useState(100);
-  const listModels = useServerFn(listGatewayModels);
-  const [models, setModels] = useState<string[]>([]);
+/* ---------------- Models & pricing ---------------- */
+export function ModelsList() {
+  const { data: models = [], isLoading, error } = usePublicModels();
+  return (
+    <Section title="Models & pricing">
+      <p className="mb-4 text-sm text-muted-foreground">Prices are in Toperouter tokens charged per model token. A rate of 1 means one balance token per model token. Free models cost nothing but still require a positive balance.</p>
+      {error ? <Empty>Unable to load models.</Empty> : isLoading ? <ListSkeleton /> : !models.length ? <Empty>No models have been published yet.</Empty> : (
+        <div className="well content-reveal overflow-x-auto">
+          <table className="w-full font-mono text-xs">
+            <thead><tr className="text-left">{["Model ID", "Name", "Plan", "Input ×", "Output ×"].map((h) => <th key={h} className="label-plate px-3 py-2">{h}</th>)}</tr></thead>
+            <tbody>{models.map((m) => (
+              <tr key={m.id} className="border-t">
+                <td className="px-3 py-2 font-semibold">{m.slug}</td>
+                <td className="px-3 py-2">{m.display_name}</td>
+                <td className="px-3 py-2">{m.is_free ? <span className="text-primary">Free</span> : "Pay as you go"}</td>
+                <td className="px-3 py-2">{m.is_free ? "0" : Number(m.input_rate)}</td>
+                <td className="px-3 py-2">{m.is_free ? "0" : Number(m.output_rate)}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      )}
+    </Section>
+  );
+}
 
-  const { data: rules = [] } = useQuery({
-    queryKey: ["rules"],
+/* ---------------- Billing ---------------- */
+export function Billing() {
+  const qc = useQueryClient();
+  const { data: profile, isLoading } = useProfile();
+  const { data: settings } = useSettings();
+  const redeem = useServerFn(redeemCode);
+  const topup = useServerFn(submitTopup);
+  const [code, setCode] = useState("");
+  const [method, setMethod] = useState("bkash");
+  const [amount, setAmount] = useState("");
+  const [txRef, setTxRef] = useState("");
+  const [tokens, setTokens] = useState("");
+  const { data: requests = [] } = useQuery({
+    queryKey: ["topups"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("routing_rules").select("*").order("priority");
+      const { data, error } = await supabase.from("topup_requests").select("*").order("created_at", { ascending: false }).limit(20);
       if (error) throw error;
       return data;
     },
   });
-
-  async function add(e: React.FormEvent) {
-    e.preventDefault();
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { toast.error("Sign in to add a rule"); return; }
-    const { error } = await supabase.from("routing_rules").insert({
-      user_id: u.user.id, model_pattern: pattern.trim(), gateway_id: gatewayId, upstream_model: upstream.trim() || null, priority,
-    });
-    if (error) { toast.error(error.message); return; }
-    setPattern(""); setUpstream("");
-    qc.invalidateQueries({ queryKey: ["rules"] });
-  }
-  async function del(id: string) {
-    const { error } = await supabase.from("routing_rules").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["rules"] });
-  }
-  async function loadModels(id: string) {
-    setGatewayId(id);
-    setModels([]);
-    if (!id) return;
-    try { setModels(await listModels({ data: { id } })); } catch (e) { toast.error((e as Error).message); }
-  }
+  const doRedeem = useMutation({
+    mutationFn: () => redeem({ data: { code } }),
+    onSuccess: ({ tokens }) => { toast.success(`${fmt(tokens)} tokens added`); setCode(""); qc.invalidateQueries({ queryKey: ["profile"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const doTopup = useMutation({
+    mutationFn: () => topup({ data: { method, amount, txRef, tokens: tokens ? Number(tokens) : null } }),
+    onSuccess: () => { toast.success("Request sent for review"); setAmount(""); setTxRef(""); setTokens(""); qc.invalidateQueries({ queryKey: ["topups"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const p = settings?.payments ?? {};
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
-      <Section title="New rule">
-        {!gws.length ? <Empty>Add a gateway first.</Empty> : (
-          <form className="space-y-3" onSubmit={add}>
-            <label className="block"><span className="label-plate">Model pattern (glob)</span>
-              <input className="field mt-1" value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="deepseek-* or gpt-4o" required /></label>
-            <label className="block"><span className="label-plate">Gateway</span>
-              <select className="field mt-1" value={gatewayId} onChange={(e) => loadModels(e.target.value)} required>
-                <option value="">Select…</option>
-                {gws.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select></label>
-            <label className="block"><span className="label-plate">Upstream model (optional rewrite)</span>
-              <input className="field mt-1" list="upstream-models" value={upstream} onChange={(e) => setUpstream(e.target.value)} placeholder="deepseek/deepseek-chat" />
-              <datalist id="upstream-models">{models.map((m) => <option key={m} value={m} />)}</datalist></label>
-            <label className="block"><span className="label-plate">Priority (lower first)</span>
-              <input className="field mt-1" type="number" value={priority} onChange={(e) => setPriority(Number(e.target.value))} /></label>
-            <Button variant="outline" className="btn btn-primary w-full">Add rule</Button>
-          </form>
-        )}
-      </Section>
-      <Section title="Routing table">
-        <div className="well mb-4 p-3 text-xs text-muted-foreground">
-          Resolution order: <b>1.</b> <code>slug/model</code> targets a gateway directly · <b>2.</b> matching rules by priority, failing over on 429/5xx · <b>3.</b> otherwise all enabled gateways, fastest first.
+    <div className="space-y-8">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="panel p-6">
+          <div className="label-plate">Token balance</div>
+          <div className="mt-3 font-display text-4xl font-bold">{isLoading ? <Skeleton className="h-10 w-40" /> : fmt(profile?.token_balance)}</div>
+          {!isLoading && (profile?.token_balance ?? 0) <= 0 && <p className="mt-2 text-sm text-destructive">Balance is 0 — requests are blocked until you top up or redeem a code.</p>}
         </div>
-        {!rules.length ? <Empty>No rules — requests use automatic latency-ordered routing.</Empty> : (
-          <div className="space-y-2">
-            {rules.map((r) => (
-              <div key={r.id} className="well flex flex-wrap items-center justify-between gap-3 p-3 font-mono text-xs">
-                <span className="panel px-2 py-1">#{r.priority}</span>
-                <span className="flex-1 font-semibold">{r.model_pattern}</span>
-                <span>→ {gws.find((g) => g.id === r.gateway_id)?.name ?? "?"}{r.upstream_model ? ` : ${r.upstream_model}` : ""}</span>
-                <Button variant="outline" className="btn btn-danger" onClick={() => del(r.id)}>Delete</Button>
-              </div>
-            ))}
+        <form className="panel p-6" onSubmit={(e) => { e.preventDefault(); doRedeem.mutate(); }}>
+          <div className="label-plate">Redeem code</div>
+          <div className="mt-3 flex gap-2">
+            <input className="field" value={code} onChange={(e) => setCode(e.target.value)} placeholder="TR-XXXXXXXXXX" required />
+            <Button disabled={doRedeem.isPending}>Redeem</Button>
           </div>
-        )}
+        </form>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Section title="How to pay">
+          <div className="space-y-3 text-sm">
+            {p.bkash && <div className="well p-4"><div className="label-plate">bKash</div><div className="mt-1 font-mono">{p.bkash}</div></div>}
+            {p.binance_pay_id && <div className="well p-4"><div className="label-plate">Binance Pay ID</div><div className="mt-1 font-mono">{p.binance_pay_id}</div></div>}
+            {(p.wallets ?? []).map((w) => <div key={w.address} className="well p-4"><div className="label-plate">{w.network}</div><div className="mt-1 break-all font-mono">{w.address}</div></div>)}
+            {p.instructions && <p className="whitespace-pre-wrap text-muted-foreground">{p.instructions}</p>}
+            {!p.bkash && !p.binance_pay_id && !(p.wallets ?? []).length && <Empty>Payment details haven't been published yet.</Empty>}
+          </div>
+        </Section>
+        <Section title="Request a top-up">
+          <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); doTopup.mutate(); }}>
+            <label className="block"><span className="label-plate">Method</span>
+              <select className="field mt-1" value={method} onChange={(e) => setMethod(e.target.value)}>
+                <option value="bkash">bKash</option><option value="binance">Binance Pay</option><option value="crypto">Crypto wallet</option>
+              </select></label>
+            <label className="block"><span className="label-plate">Amount paid</span><input className="field mt-1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 500 BDT or 5 USDT" required /></label>
+            <label className="block"><span className="label-plate">Transaction ID / reference</span><input className="field mt-1" value={txRef} onChange={(e) => setTxRef(e.target.value)} required /></label>
+            <label className="block"><span className="label-plate">Tokens requested (optional)</span><input className="field mt-1" type="number" min={1} value={tokens} onChange={(e) => setTokens(e.target.value)} /></label>
+            <Button className="w-full" disabled={doTopup.isPending}>Submit for review</Button>
+            <p className="text-xs text-muted-foreground">An admin checks each payment and credits your balance by hand.</p>
+          </form>
+        </Section>
+      </div>
+
+      <Section title="Your top-up requests">
+        {!requests.length ? <Empty>No requests yet.</Empty> : <div className="space-y-2">{requests.map((r) => (
+          <div key={r.id} className="well flex flex-wrap items-center justify-between gap-3 p-3 text-sm">
+            <span className="font-mono text-xs">{new Date(r.created_at).toLocaleString()}</span>
+            <span>{r.method} · {r.amount}</span>
+            <span className={cn("label-plate", r.status === "approved" && "text-primary", r.status === "rejected" && "text-destructive")}>{r.status}{r.tokens_granted ? ` · +${fmt(r.tokens_granted)}` : ""}</span>
+          </div>
+        ))}</div>}
       </Section>
     </div>
   );
@@ -338,6 +236,7 @@ export function Routing() {
 /* ---------------- Playground ---------------- */
 export function Playground() {
   const qc = useQueryClient();
+  const { data: models = [] } = usePublicModels();
   const [key, setKey] = useState("");
   const [model, setModel] = useState("");
   const [prompt, setPrompt] = useState("Say hello in five words.");
@@ -356,23 +255,28 @@ export function Playground() {
         body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }] }),
       });
       const j = await res.json();
-      setMeta(`HTTP ${res.status} · ${Math.round(performance.now() - t0)} ms · via ${res.headers.get("x-toperouter-gateway") ?? "—"}`);
+      const bal = res.headers.get("x-toperouter-balance");
+      setMeta(`HTTP ${res.status} · ${Math.round(performance.now() - t0)} ms${bal ? ` · balance ${fmt(Number(bal))}` : ""}`);
       setOut(res.ok ? (j.choices?.[0]?.message?.content ?? JSON.stringify(j, null, 2)) : JSON.stringify(j, null, 2));
     } catch (err) {
       setOut((err as Error).message);
     } finally {
       setBusy(false);
       qc.invalidateQueries({ queryKey: ["usage"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
     }
   }
 
   return (
     <Section title="Playground">
       <form className="grid gap-3 md:grid-cols-2" onSubmit={run}>
-        <label><span className="label-plate">Toperouter key</span>
+        <label><span className="label-plate">Your API key</span>
           <input className="field mt-1" type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="tr-…" required /></label>
         <label><span className="label-plate">Model</span>
-          <input className="field mt-1" value={model} onChange={(e) => setModel(e.target.value)} placeholder="openrouter/openai/gpt-4o-mini" required /></label>
+          <select className="field mt-1" value={model} onChange={(e) => setModel(e.target.value)} required>
+            <option value="">{models.length ? "Select a model…" : "No models published yet"}</option>
+            {models.map((m) => <option key={m.id} value={m.slug}>{m.display_name} ({m.slug}){m.is_free ? " · free" : ""}</option>)}
+          </select></label>
         <label className="md:col-span-2"><span className="label-plate">Prompt</span>
           <textarea className="field mt-1 min-h-24" value={prompt} onChange={(e) => setPrompt(e.target.value)} /></label>
         <div className="md:col-span-2"><Button variant="outline" className="btn btn-primary" disabled={busy}>{busy ? "Routing…" : "Send request"}</Button></div>
@@ -392,41 +296,38 @@ export function Usage() {
   const { data: logs = [], isLoading, error } = useQuery({
     queryKey: ["usage"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("usage_logs").select("*").order("created_at", { ascending: false }).limit(200);
+      const { data, error } = await supabase.from("usage_logs").select("id,created_at,model,status,latency_ms,prompt_tokens,completion_tokens,cost_tokens,stream").order("created_at", { ascending: false }).limit(200);
       if (error) throw error;
       return data;
     },
   });
   const ok = logs.filter((l) => l.status && l.status < 400);
   const avg = ok.length ? Math.round(ok.reduce((s, l) => s + (l.latency_ms ?? 0), 0) / ok.length) : null;
-  const tokens = logs.reduce((s, l) => s + (l.prompt_tokens ?? 0) + (l.completion_tokens ?? 0), 0);
+  const spent = logs.reduce((s, l) => s + Number(l.cost_tokens ?? 0), 0);
+  const sk = <Skeleton className="mt-2 h-4 w-16" />;
 
   return (
     <Section title="Usage log">
-      <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4 font-mono text-xs">
-        <Stat k="Requests" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : logs.length} />
-        <Stat k="Success" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : logs.length ? `${Math.round((ok.length / logs.length) * 100)}%` : "—"} />
-        <Stat k="Avg latency" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : avg != null ? `${avg} ms` : "—"} />
-        <Stat k="Tokens" v={isLoading ? <Skeleton className="mt-2 h-4 w-16" /> : tokens.toLocaleString()} />
+      <div className="mb-4 grid grid-cols-2 gap-2 font-mono text-xs md:grid-cols-4">
+        <Stat k="Requests" v={isLoading ? sk : logs.length} />
+        <Stat k="Success" v={isLoading ? sk : logs.length ? `${Math.round((ok.length / logs.length) * 100)}%` : "—"} />
+        <Stat k="Avg latency" v={isLoading ? sk : avg != null ? `${avg} ms` : "—"} />
+        <Stat k="Tokens spent" v={isLoading ? sk : fmt(spent)} />
       </div>
       {error ? <Empty>Unable to load usage logs. Please try again.</Empty> : isLoading ? <UsageSkeleton /> : !logs.length ? <Empty>No requests yet. Try the Playground.</Empty> : (
         <div className="well content-reveal overflow-x-auto">
           <table className="w-full font-mono text-xs">
-            <thead><tr className="text-left">
-              {["Time", "Model", "Gateway", "Status", "Latency", "Tokens"].map((h) => <th key={h} className="label-plate px-3 py-2">{h}</th>)}
-            </tr></thead>
-            <tbody>
-              {logs.map((l) => (
-                <tr key={l.id} className="border-t" title={l.error ?? ""}>
-                  <td className="px-3 py-2 whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
-                  <td className="px-3 py-2">{l.model}{l.upstream_model && l.upstream_model !== l.model ? ` → ${l.upstream_model}` : ""}</td>
-                  <td className="px-3 py-2">{l.gateway_name}</td>
-                  <td className="px-3 py-2"><span className={cn("led mr-2 align-middle", l.status && l.status < 400 ? "led-ok" : "led-bad")} />{l.status || "net"}</td>
-                  <td className="px-3 py-2">{l.latency_ms} ms</td>
-                  <td className="px-3 py-2">{l.stream ? "stream" : (l.prompt_tokens ?? 0) + (l.completion_tokens ?? 0)}</td>
-                </tr>
-              ))}
-            </tbody>
+            <thead><tr className="text-left">{["Time", "Model", "Status", "Latency", "In / Out", "Cost"].map((h) => <th key={h} className="label-plate px-3 py-2">{h}</th>)}</tr></thead>
+            <tbody>{logs.map((l) => (
+              <tr key={l.id} className="border-t">
+                <td className="whitespace-nowrap px-3 py-2">{new Date(l.created_at).toLocaleString()}</td>
+                <td className="px-3 py-2">{l.model}</td>
+                <td className="px-3 py-2"><span className={cn("led mr-2 align-middle", l.status && l.status < 400 ? "led-ok" : "led-bad")} />{l.status || "net"}</td>
+                <td className="px-3 py-2">{l.latency_ms} ms</td>
+                <td className="px-3 py-2">{fmt(l.prompt_tokens)} / {fmt(l.completion_tokens)}</td>
+                <td className="px-3 py-2">{fmt(Number(l.cost_tokens))}</td>
+              </tr>
+            ))}</tbody>
           </table>
         </div>
       )}

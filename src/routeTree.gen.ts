@@ -15,16 +15,17 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedGatewaysRouteImport } from './routes/_authenticated/gateways'
+import { Route as AuthenticatedModelsRouteImport } from './routes/_authenticated/models'
 import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authenticated/playground'
-import { Route as AuthenticatedRoutingRouteImport } from './routes/_authenticated/routing'
 import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated/usage'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsClaudeCodeRouteImport } from './routes/docs.claude-code'
 import { Route as DocsCodexCliRouteImport } from './routes/docs.codex-cli'
 import { Route as DocsHermesAgentRouteImport } from './routes/docs.hermes-agent'
 import { Route as DocsOpencodeRouteImport } from './routes/docs.opencode'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
@@ -57,24 +58,24 @@ const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
   path: '/api-keys',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedGatewaysRoute = AuthenticatedGatewaysRouteImport.update({
-  id: '/gateways',
-  path: '/gateways',
+const AuthenticatedModelsRoute = AuthenticatedModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlaygroundRoute = AuthenticatedPlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRoutingRoute = AuthenticatedRoutingRouteImport.update({
-  id: '/routing',
-  path: '/routing',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedUsageRoute = AuthenticatedUsageRouteImport.update({
@@ -107,6 +108,12 @@ const DocsOpencodeRoute = DocsOpencodeRouteImport.update({
   path: '/opencode',
   getParentRoute: () => DocsRoute,
 } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1ModelsRoute = ApiPublicV1ModelsRouteImport.update({
   id: '/api/public/v1/models',
   path: '/api/public/v1/models',
@@ -125,16 +132,17 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/models': typeof AuthenticatedModelsRoute
   '/playground': typeof AuthenticatedPlaygroundRoute
-  '/routing': typeof AuthenticatedRoutingRoute
   '/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
   '/docs/codex-cli': typeof DocsCodexCliRoute
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -143,16 +151,17 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/terms': typeof TermsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/gateways': typeof AuthenticatedGatewaysRoute
+  '/models': typeof AuthenticatedModelsRoute
   '/playground': typeof AuthenticatedPlaygroundRoute
-  '/routing': typeof AuthenticatedRoutingRoute
   '/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
   '/docs/codex-cli': typeof DocsCodexCliRoute
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -164,16 +173,17 @@ export interface FileRoutesById {
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
   '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/gateways': typeof AuthenticatedGatewaysRoute
+  '/_authenticated/models': typeof AuthenticatedModelsRoute
   '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
-  '/_authenticated/routing': typeof AuthenticatedRoutingRoute
   '/_authenticated/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
   '/docs/codex-cli': typeof DocsCodexCliRoute
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -185,16 +195,17 @@ export interface FileRouteTypes {
     | '/docs'
     | '/terms'
     | '/api-keys'
+    | '/billing'
     | '/dashboard'
-    | '/gateways'
+    | '/models'
     | '/playground'
-    | '/routing'
     | '/usage'
     | '/docs/claude-code'
     | '/docs/codex-cli'
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs/'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
@@ -203,16 +214,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/terms'
     | '/api-keys'
+    | '/billing'
     | '/dashboard'
-    | '/gateways'
+    | '/models'
     | '/playground'
-    | '/routing'
     | '/usage'
     | '/docs/claude-code'
     | '/docs/codex-cli'
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   id:
@@ -223,16 +235,17 @@ export interface FileRouteTypes {
     | '/docs'
     | '/terms'
     | '/_authenticated/api-keys'
+    | '/_authenticated/billing'
     | '/_authenticated/dashboard'
-    | '/_authenticated/gateways'
+    | '/_authenticated/models'
     | '/_authenticated/playground'
-    | '/_authenticated/routing'
     | '/_authenticated/usage'
     | '/docs/claude-code'
     | '/docs/codex-cli'
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs/'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
@@ -243,6 +256,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRouteWithChildren
   TermsRoute: typeof TermsRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   ApiPublicV1ModelsRoute: typeof ApiPublicV1ModelsRoute
   ApiPublicV1ChatCompletionsRoute: typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -291,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedApiKeysRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -298,11 +319,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/gateways': {
-      id: '/_authenticated/gateways'
-      path: '/gateways'
-      fullPath: '/gateways'
-      preLoaderRoute: typeof AuthenticatedGatewaysRouteImport
+    '/_authenticated/models': {
+      id: '/_authenticated/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof AuthenticatedModelsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/playground': {
@@ -310,13 +331,6 @@ declare module '@tanstack/react-router' {
       path: '/playground'
       fullPath: '/playground'
       preLoaderRoute: typeof AuthenticatedPlaygroundRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/routing': {
-      id: '/_authenticated/routing'
-      path: '/routing'
-      fullPath: '/routing'
-      preLoaderRoute: typeof AuthenticatedRoutingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/usage': {
@@ -361,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsOpencodeRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/models': {
       id: '/api/public/v1/models'
       path: '/api/public/v1/models'
@@ -380,19 +401,19 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedGatewaysRoute: typeof AuthenticatedGatewaysRoute
+  AuthenticatedModelsRoute: typeof AuthenticatedModelsRoute
   AuthenticatedPlaygroundRoute: typeof AuthenticatedPlaygroundRoute
-  AuthenticatedRoutingRoute: typeof AuthenticatedRoutingRoute
   AuthenticatedUsageRoute: typeof AuthenticatedUsageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
+  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedGatewaysRoute: AuthenticatedGatewaysRoute,
+  AuthenticatedModelsRoute: AuthenticatedModelsRoute,
   AuthenticatedPlaygroundRoute: AuthenticatedPlaygroundRoute,
-  AuthenticatedRoutingRoute: AuthenticatedRoutingRoute,
   AuthenticatedUsageRoute: AuthenticatedUsageRoute,
 }
 
@@ -423,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DocsRoute: DocsRouteWithChildren,
   TermsRoute: TermsRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   ApiPublicV1ModelsRoute: ApiPublicV1ModelsRoute,
   ApiPublicV1ChatCompletionsRoute: ApiPublicV1ChatCompletionsRoute,
 }

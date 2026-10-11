@@ -1,15 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Activity, ArrowLeftRight, BookOpen, Cable, KeyRound, LayoutDashboard, LogOut, Terminal } from "lucide-react";
+import { Activity, BookOpen, Boxes, Coins, KeyRound, LayoutDashboard, LogOut, Terminal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
 
 const items = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/gateways", label: "Gateways", icon: Cable },
-  { to: "/api-keys", label: "API keys", icon: KeyRound },
-  { to: "/routing", label: "Routing", icon: ArrowLeftRight },
+  { to: "/api-keys", label: "API key", icon: KeyRound },
+  { to: "/models", label: "Models", icon: Boxes },
+  { to: "/billing", label: "Balance", icon: Coins },
   { to: "/playground", label: "Playground", icon: Terminal },
   { to: "/usage", label: "Usage logs", icon: Activity },
 ] as const;
