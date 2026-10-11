@@ -15,7 +15,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedModelsRouteImport } from './routes/_authenticated/models'
 import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authenticated/playground'
 import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated/usage'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
@@ -56,9 +58,19 @@ const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
   path: '/api-keys',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedModelsRoute = AuthenticatedModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlaygroundRoute = AuthenticatedPlaygroundRouteImport.update({
@@ -120,7 +132,9 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/models': typeof AuthenticatedModelsRoute
   '/playground': typeof AuthenticatedPlaygroundRoute
   '/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
@@ -137,7 +151,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/terms': typeof TermsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/models': typeof AuthenticatedModelsRoute
   '/playground': typeof AuthenticatedPlaygroundRoute
   '/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
@@ -157,7 +173,9 @@ export interface FileRoutesById {
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
   '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/models': typeof AuthenticatedModelsRoute
   '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
   '/_authenticated/usage': typeof AuthenticatedUsageRoute
   '/docs/claude-code': typeof DocsClaudeCodeRoute
@@ -177,7 +195,9 @@ export interface FileRouteTypes {
     | '/docs'
     | '/terms'
     | '/api-keys'
+    | '/billing'
     | '/dashboard'
+    | '/models'
     | '/playground'
     | '/usage'
     | '/docs/claude-code'
@@ -194,7 +214,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/terms'
     | '/api-keys'
+    | '/billing'
     | '/dashboard'
+    | '/models'
     | '/playground'
     | '/usage'
     | '/docs/claude-code'
@@ -213,7 +235,9 @@ export interface FileRouteTypes {
     | '/docs'
     | '/terms'
     | '/_authenticated/api-keys'
+    | '/_authenticated/billing'
     | '/_authenticated/dashboard'
+    | '/_authenticated/models'
     | '/_authenticated/playground'
     | '/_authenticated/usage'
     | '/docs/claude-code'
@@ -281,11 +305,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedApiKeysRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/models': {
+      id: '/_authenticated/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof AuthenticatedModelsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/playground': {
@@ -363,14 +401,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedModelsRoute: typeof AuthenticatedModelsRoute
   AuthenticatedPlaygroundRoute: typeof AuthenticatedPlaygroundRoute
   AuthenticatedUsageRoute: typeof AuthenticatedUsageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
+  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedModelsRoute: AuthenticatedModelsRoute,
   AuthenticatedPlaygroundRoute: AuthenticatedPlaygroundRoute,
   AuthenticatedUsageRoute: AuthenticatedUsageRoute,
 }
