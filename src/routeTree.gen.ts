@@ -25,6 +25,7 @@ import { Route as DocsClaudeCodeRouteImport } from './routes/docs.claude-code'
 import { Route as DocsCodexCliRouteImport } from './routes/docs.codex-cli'
 import { Route as DocsHermesAgentRouteImport } from './routes/docs.hermes-agent'
 import { Route as DocsOpencodeRouteImport } from './routes/docs.opencode'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
@@ -107,6 +108,12 @@ const DocsOpencodeRoute = DocsOpencodeRouteImport.update({
   path: '/opencode',
   getParentRoute: () => DocsRoute,
 } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1ModelsRoute = ApiPublicV1ModelsRouteImport.update({
   id: '/api/public/v1/models',
   path: '/api/public/v1/models',
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/docs/hermes-agent': typeof DocsHermesAgentRoute
   '/docs/opencode': typeof DocsOpencodeRoute
   '/docs/': typeof DocsIndexRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs/'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   id:
@@ -233,6 +245,7 @@ export interface FileRouteTypes {
     | '/docs/hermes-agent'
     | '/docs/opencode'
     | '/docs/'
+    | '/api/public/telegram/webhook'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
@@ -243,6 +256,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRouteWithChildren
   TermsRoute: typeof TermsRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   ApiPublicV1ModelsRoute: typeof ApiPublicV1ModelsRoute
   ApiPublicV1ChatCompletionsRoute: typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -361,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsOpencodeRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/models': {
       id: '/api/public/v1/models'
       path: '/api/public/v1/models'
@@ -423,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DocsRoute: DocsRouteWithChildren,
   TermsRoute: TermsRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   ApiPublicV1ModelsRoute: ApiPublicV1ModelsRoute,
   ApiPublicV1ChatCompletionsRoute: ApiPublicV1ChatCompletionsRoute,
 }
