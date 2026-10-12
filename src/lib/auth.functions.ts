@@ -7,7 +7,7 @@ export const startTelegramLogin = createServerFn({ method: "POST" }).handler(asy
   const code = randomToken(16);
   const { error } = await supabaseAdmin.from("login_sessions").insert({ code });
   if (error) throw new Error("Could not start sign-in");
-  return { code, url: `https://t.me/${botUsername()}?start=${code}` };
+  return { code, url: `https://t.me/${await botUsername()}?start=${code}` };
 });
 
 export const pollTelegramLogin = createServerFn({ method: "POST" })
