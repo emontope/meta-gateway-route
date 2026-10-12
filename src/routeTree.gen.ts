@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -128,6 +134,7 @@ const ApiPublicV1ChatCompletionsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/terms': typeof TermsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRouteWithChildren
   '/terms': typeof TermsRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/docs'
     | '/terms'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
     | '/terms'
     | '/api-keys'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/auth'
     | '/docs'
     | '/terms'
@@ -253,6 +265,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRouteWithChildren
   TermsRoute: typeof TermsRoute
@@ -275,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -441,6 +461,7 @@ const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   DocsRoute: DocsRouteWithChildren,
   TermsRoute: TermsRoute,
