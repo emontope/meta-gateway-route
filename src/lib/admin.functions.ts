@@ -323,7 +323,7 @@ export const adminReviewTopup = createServerFn({ method: "POST" })
 
 /* ---------------- Settings ---------------- */
 export type PaymentSettings = { bkash: string; binance_pay_id: string; wallets: { network: string; address: string }[]; instructions: string };
-export type LinkSettings = { channel: string; group: string };
+export type LinkSettings = { channel: string; group: string; support?: string };
 
 export const adminSaveSettings = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
@@ -340,7 +340,7 @@ export const adminSaveSettings = createServerFn({ method: "POST" })
         wallets: (d.payments.wallets ?? []).filter((w) => w.address?.trim()).slice(0, 10).map((w) => ({ network: w.network.trim().slice(0, 40), address: w.address.trim().slice(0, 140) })),
         instructions: (d.payments.instructions ?? "").slice(0, 1000),
       },
-      links: { channel: url(d.links.channel), group: url(d.links.group) },
+      links: { channel: url(d.links.channel), group: url(d.links.group), support: (d.links.support ?? "").trim().replace(/[^A-Za-z0-9_@]/g, "").slice(0, 40) },
     };
   })
   .handler(async ({ data, context }) => {
@@ -351,4 +351,53 @@ export const adminSaveSettings = createServerFn({ method: "POST" })
     ]);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+/* ---------------- Overview & Telegram ---------------- */
+export const adminOverview = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const a = context.admin;
+    const [users, pending, logs, settings] = await Promise.all([
+      a.from("profiles").select("id", { count: "exact", head: true }),
+      a.from("topup_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      a.from("usage_logs").select("cost_tokens, status").order("created_at", { ascending: false }).limit(5000),
+      a.from("app_settings").select("key,value"),
+    ]);
+    const rows = logs.data ?? [];
+    return {
+      users: users.count ?? 0,
+      pendingTopups: pending.count ?? 0,
+      burned: rows.reduce((s, r) => s + Number(r.cost_tokens ?? 0), 0),
+      requests: rows.length,
+      errors: rows.filter((r) => !r.status || r.status >= 400).length,
+      settings: Object.fromEntries((settings.data ?? []).map((r) => [r.key, r.value])) as Record<string, unknown>,
+    };
+  });
+
+export const adminTelegramStatus = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    const t = await import("./telegram.server");
+    try {
+      const [me, wh] = await Promise.all([t.tg("getMe"), t.tg("getWebhookInfo")]);
+      return { ok: true, mode: t.telegramMode(), expectedUrl: t.WEBHOOK_URL, bot: me.result as { username?: string; first_name?: string; id?: number }, webhook: wh.result as { url?: string; pending_update_count?: number; last_error_message?: string; last_error_date?: number }, error: null };
+    } catch (e) {
+      return { ok: false, mode: t.telegramMode(), expectedUrl: t.WEBHOOK_URL, bot: null, webhook: null, error: (e as Error).message };
+    }
+  });
+
+export const adminRegisterWebhook = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    const t = await import("./telegram.server");
+    await t.registerWebhook();
+    return { ok: true };
+  });
+
+export const adminListRedemptions = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const { data } = await context.admin.from("redemptions").select("id, code_id, user_id, tokens, created_at").order("created_at", { ascending: false }).limit(100);
+    return data ?? [];
   });
