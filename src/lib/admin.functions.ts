@@ -95,7 +95,7 @@ export const adminListGateways = createServerFn({ method: "GET" })
 
 export const adminSaveGateway = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((d: { id?: string; name: string; provider: string; baseUrl: string; apiKey?: string; enabled?: boolean }) => {
+  .inputValidator((d: { id?: string | undefined; name: string; provider: string; baseUrl: string; apiKey?: string | undefined; enabled?: boolean }) => {
     if (!d.name?.trim()) throw new Error("Name is required");
     if (!/^https:\/\//.test(d.baseUrl ?? "")) throw new Error("Base URL must start with https://");
     if (!d.id && !d.apiKey?.trim()) throw new Error("API key is required");
@@ -170,7 +170,7 @@ export const adminListModels = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
-type ModelInput = { id?: string; slug: string; displayName: string; gatewayId: string; upstreamModel: string; isFree: boolean; inputRate: number; outputRate: number; priority: number; enabled: boolean };
+type ModelInput = { id?: string | undefined; slug: string; displayName: string; gatewayId: string; upstreamModel: string; isFree: boolean; inputRate: number; outputRate: number; priority: number; enabled: boolean };
 export const adminSaveModel = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: ModelInput) => {
@@ -371,7 +371,7 @@ export const adminOverview = createServerFn({ method: "GET" })
       burned: rows.reduce((s, r) => s + Number(r.cost_tokens ?? 0), 0),
       requests: rows.length,
       errors: rows.filter((r) => !r.status || r.status >= 400).length,
-      settings: Object.fromEntries((settings.data ?? []).map((r) => [r.key, r.value])) as Record<string, unknown>,
+      settings: JSON.stringify(Object.fromEntries((settings.data ?? []).map((r) => [r.key, r.value]))),
     };
   });
 

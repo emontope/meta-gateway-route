@@ -426,8 +426,9 @@ function SettingsTab() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["a-overview"], queryFn: () => ov() });
   if (isLoading || !data) return <ListSkeleton />;
-  const p = (data.settings["payments"] ?? {}) as A.PaymentSettings;
-  const l = (data.settings["links"] ?? {}) as A.LinkSettings;
+  const st = JSON.parse(data.settings) as Record<string, unknown>;
+  const p = (st["payments"] ?? {}) as A.PaymentSettings;
+  const l = (st["links"] ?? {}) as A.LinkSettings;
   return <SettingsForm initial={{ payments: { bkash: p.bkash ?? "", binance_pay_id: p.binance_pay_id ?? "", wallets: p.wallets ?? [], instructions: p.instructions ?? "" }, links: { channel: l.channel ?? "", group: l.group ?? "", support: l.support ?? "" } }}
     onSave={async (v) => { try { await save({ data: v }); toast.success("Settings saved"); qc.invalidateQueries({ queryKey: ["a-overview"] }); } catch (e) { onErr(e as Error); } }} />;
 }
