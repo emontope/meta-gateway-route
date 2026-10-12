@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import { Activity, Bot, Boxes, Cable, Coins, Gift, LayoutDashboard, Link2, LogOut, ShieldCheck, Users, Wallet } from "lucide-react";
 import * as A from "@/lib/admin.functions";
@@ -401,7 +401,7 @@ function Logs() {
       {isLoading ? <ListSkeleton /> : !logs.length ? <Empty>No requests.</Empty> : (
         <div className="well overflow-x-auto"><table className="w-full font-mono text-xs">
           <thead><tr className="text-left">{["Time", "Model → upstream", "Gateway", "Status", "Latency", "In/Out", "Cost"].map((h) => <th key={h} className="label-plate px-3 py-2">{h}</th>)}</tr></thead>
-          <tbody>{logs.map((l) => (<>
+          <tbody>{logs.map((l) => (<Fragment key={l.id}>
             <tr key={l.id} className={cn("border-t", l.error && "cursor-pointer")} onClick={() => l.error && setOpen(open === l.id ? null : l.id)}>
               <td className="whitespace-nowrap px-3 py-2">{new Date(l.created_at).toLocaleString()}</td>
               <td className="px-3 py-2">{l.model} → {l.upstream_model}</td>
@@ -412,7 +412,7 @@ function Logs() {
               <td className="px-3 py-2">{fmt(Number(l.cost_tokens))}</td>
             </tr>
             {open === l.id && <tr key={l.id + "e"}><td colSpan={7} className="break-all px-3 pb-3 text-destructive">{l.error}</td></tr>}
-          </>))}</tbody>
+          </Fragment>))}</tbody>
         </table></div>
       )}
     </Section>
