@@ -304,7 +304,7 @@ export const adminListTopups = createServerFn({ method: "GET" })
 
 export const adminReviewTopup = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((d: { id: string; approve: boolean; tokens?: number; note?: string }) => {
+  .inputValidator((d: { id: string; approve: boolean; tokens?: number | undefined; note?: string }) => {
     if (d.approve && !(Number(d.tokens) > 0)) throw new Error("Enter tokens to credit");
     return { ...d, tokens: Math.floor(Number(d.tokens) || 0), note: (d.note ?? "").slice(0, 300) };
   })
