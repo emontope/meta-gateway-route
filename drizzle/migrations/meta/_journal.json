@@ -15,6 +15,13 @@
       "when": 1791693275791,
       "tag": "0001_gateway_platform",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791868828390,
+      "tag": "0002_credit_reservations_ledger",
+      "breakpoints": true
     }
   ]
 }

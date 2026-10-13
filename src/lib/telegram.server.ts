@@ -1,5 +1,19 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-export const WEBHOOK_URL = "https://meta-gateway-route.lovable.app/api/public/telegram/webhook";
+const WEBHOOK_PATH = "/api/public/telegram/webhook";
+const DEFAULT_ALLOWED_HOSTS = ["meta-gateway-route.lovable.app"];
+
+/** Derives the webhook URL from server-side APP_URL; rejects non-HTTPS, credentials, ports, paths, or unexpected hosts. */
+export function webhookConfig(): { ok: true; url: string; host: string } | { ok: false; error: string } {
+  const raw = process.env["APP_URL"]?.trim();
+  if (!raw) return { ok: false, error: "APP_URL is not configured" };
+  let u: URL;
+  try { u = new URL(raw); } catch { return { ok: false, error: "APP_URL is not a valid URL" }; }
+  if (u.protocol !== "https:") return { ok: false, error: "APP_URL must use https" };
+  if (u.username || u.password || u.port || u.search || u.hash || (u.pathname !== "/" && u.pathname !== "")) return { ok: false, error: "APP_URL must be a bare origin (no path, port, query or credentials)" };
+  const allowed = [...DEFAULT_ALLOWED_HOSTS, ...(process.env["APP_ALLOWED_HOSTS"] ?? "").split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)];
+  if (!allowed.includes(u.hostname.toLowerCase())) return { ok: false, error: `Host ${u.hostname} is not in the allowed host list` };
+  return { ok: true, url: `https://${u.hostname}${WEBHOOK_PATH}`, host: u.hostname };
+}
 
 /** Direct bot token (AuthTGBOT preferred), else null → connector gateway fallback. */
 function botToken() {
@@ -61,8 +75,10 @@ export async function botUsername() {
 }
 
 export async function registerWebhook() {
+  const cfg = webhookConfig();
+  if (!cfg.ok) throw new Error(cfg.error);
   return tg("setWebhook", {
-    url: WEBHOOK_URL,
+    url: cfg.url,
     secret_token: await telegramWebhookSecret(),
     allowed_updates: ["message"],
     drop_pending_updates: false,

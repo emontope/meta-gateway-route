@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_identity: string
+          created_at: string
+          details: Json
+          id: number
+        }
+        Insert: {
+          action: string
+          admin_identity: string
+          created_at?: string
+          details?: Json
+          id?: number
+        }
+        Update: {
+          action?: string
+          admin_identity?: string
+          created_at?: string
+          details?: Json
+          id?: number
+        }
+        Relationships: []
+      }
       admin_login_attempts: {
         Row: {
           created_at: string
@@ -104,6 +128,78 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      balance_transactions: {
+        Row: {
+          admin_identity: string | null
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          id: string
+          kind: string
+          reason: string
+          reference: string
+          user_id: string
+        }
+        Insert: {
+          admin_identity?: string | null
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at?: string
+          id?: string
+          kind: string
+          reason: string
+          reference: string
+          user_id: string
+        }
+        Update: {
+          admin_identity?: string | null
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          reason?: string
+          reference?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_reservations: {
+        Row: {
+          amount: number
+          charged: number | null
+          created_at: string
+          finalized_at: string | null
+          id: string
+          note: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          charged?: number | null
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          charged?: number | null
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -469,12 +565,53 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _ledger_apply: {
+        Args: {
+          _admin: string
+          _amount: number
+          _kind: string
+          _reason: string
+          _reference: string
+          _uid: string
+        }
+        Returns: number
+      }
       adjust_tokens: { Args: { _delta: number; _uid: string }; Returns: number }
+      admin_adjust_balance: {
+        Args: {
+          _admin: string
+          _amount: number
+          _reason: string
+          _reference: string
+          _uid: string
+        }
+        Returns: {
+          is_duplicate: boolean
+          new_balance: number
+        }[]
+      }
+      approve_topup: {
+        Args: { _admin: string; _id: string; _note: string; _tokens: number }
+        Returns: number
+      }
       charge_tokens: {
         Args: { _amount: number; _uid: string }
         Returns: number
       }
       redeem_code: { Args: { _code: string; _uid: string }; Returns: number }
+      release_credits: {
+        Args: { _reason?: string; _rid: string }
+        Returns: boolean
+      }
+      release_stale_credits: { Args: { _older_than?: string }; Returns: number }
+      reserve_credits: {
+        Args: { _amount: number; _note?: string; _uid: string }
+        Returns: string
+      }
+      settle_credits: {
+        Args: { _actual: number; _rid: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
