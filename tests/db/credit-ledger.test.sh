@@ -12,8 +12,8 @@ bal() { Q "SELECT token_balance FROM public.profiles WHERE id='$1'"; }
 
 # 1. Concurrent reservations cannot overdraft
 U=$(newuser 1000)
-for i in $(seq 1 20); do Q "SELECT public.reserve_credits('$U', 100) IS NOT NULL" > /tmp/r_$i & done; wait
-ok=$(cat /tmp/r_* | grep -c t || true); rm -f /tmp/r_*
+for i in $(seq 1 20); do Q "SELECT public.reserve_credits('$U', 100) IS NOT NULL" > ${TMPDIR:-/tmp}/r_$i & done; wait
+ok=$(cat ${TMPDIR:-/tmp}/r_* | grep -c t || true); rm -f ${TMPDIR:-/tmp}/r_*
 check "20 parallel holds of 100 on 1000 → exactly 10 succeed" "$ok" "10"
 check "balance never negative after parallel holds" "$(bal "$U")" "0"
 check "ledger reconciles with balance" "$(Q "SELECT 1000 + COALESCE(sum(amount),0) FROM public.balance_transactions WHERE user_id='$U'")" "0"
