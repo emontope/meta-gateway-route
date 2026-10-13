@@ -317,7 +317,7 @@ export const adminReviewTopup = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const row = rows?.[0];
     if (!row) throw new Error("Request was already reviewed");
-    if (data.approve) await context.admin.rpc("adjust_tokens", { _uid: row.user_id, _delta: data.tokens });
+    void row;
     return { ok: true };
   });
 
@@ -381,14 +381,20 @@ export const adminTelegramStatus = createServerFn({ method: "GET" })
     const t = await import("./telegram.server");
     try {
       const [me, wh] = await Promise.all([t.tg("getMe"), t.tg("getWebhookInfo")]);
-      return { ok: true, mode: t.telegramMode(), expectedUrl: t.WEBHOOK_URL, bot: me.result as { username?: string; first_name?: string; id?: number }, webhook: wh.result as { url?: string; pending_update_count?: number; last_error_message?: string; last_error_date?: number }, error: null };
+      const cfg = t.webhookConfig();
+      return { ok: true, mode: t.telegramMode(), expectedUrl: cfg.ok ? cfg.url : "", configError: cfg.ok ? null : cfg.error, bot: me.result as { username?: string; first_name?: string; id?: number }, webhook: wh.result as { url?: string; pending_update_count?: number; last_error_message?: string; last_error_date?: number }, error: null };
     } catch (e) {
-      return { ok: false, mode: t.telegramMode(), expectedUrl: t.WEBHOOK_URL, bot: null, webhook: null, error: (e as Error).message };
+      const cfg = t.webhookConfig();
+      return { ok: false, mode: t.telegramMode(), expectedUrl: cfg.ok ? cfg.url : "", configError: cfg.ok ? null : cfg.error, bot: null, webhook: null, error: (e as Error).message };
     }
   });
 
 export const adminRegisterWebhook = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
+  .inputValidator((d: { confirm: string }) => {
+    if (d?.confirm !== "REGISTER") throw new Error("Type REGISTER to confirm changing the live webhook");
+    return d;
+  })
   .handler(async () => {
     const t = await import("./telegram.server");
     await t.registerWebhook();
