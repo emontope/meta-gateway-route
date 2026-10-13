@@ -217,20 +217,39 @@ export const adminListUsers = createServerFn({ method: "POST" })
 
 export const adminAdjustBalance = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((d: { userId: string; delta?: number; set?: number }) => {
-    if (d.set !== undefined && !(d.set >= 0)) throw new Error("Balance must be 0 or more");
-    if (d.delta !== undefined && !Number.isFinite(d.delta)) throw new Error("Invalid amount");
-    return d;
+  .inputValidator((d: { userId: string; amount: number; reason: string; reference: string }) => {
+    const amount = Math.trunc(Number(d.amount));
+    if (!Number.isFinite(amount) || amount === 0 || Math.abs(amount) > 1e12) throw new Error("Enter a non-zero whole amount");
+    const reason = String(d.reason ?? "").trim();
+    if (reason.length < 3 || reason.length > 500) throw new Error("A reason (3-500 characters) is required");
+    if (!/^[A-Za-z0-9:_-]{8,100}$/.test(d.reference ?? "")) throw new Error("Invalid reference");
+    return { userId: d.userId, amount, reason, reference: d.reference };
   })
   .handler(async ({ data, context }) => {
-    if (data.set !== undefined) {
-      const { error } = await context.admin.from("profiles").update({ token_balance: Math.floor(data.set) }).eq("id", data.userId);
-      if (error) throw new Error(error.message);
-    } else {
-      const { error } = await context.admin.rpc("adjust_tokens", { _uid: data.userId, _delta: Math.floor(data.delta ?? 0) });
-      if (error) throw new Error(error.message);
+    const { data: r, error } = await context.admin.rpc("admin_adjust_balance", {
+      _uid: data.userId, _amount: data.amount, _reason: data.reason, _admin: context.adminIdentity, _reference: data.reference,
+    });
+    if (error) throw new Error(error.message);
+    const row = (r as { new_balance: number; is_duplicate: boolean }[] | null)?.[0];
+    return { balance: Number(row?.new_balance ?? 0), duplicate: !!row?.is_duplicate };
+  });
+
+export const adminListTransactions = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: { q?: string }) => ({ q: String(d?.q ?? "").trim().slice(0, 100) }))
+  .handler(async ({ data, context }) => {
+    let q = context.admin.from("balance_transactions").select("*").order("created_at", { ascending: false }).limit(200);
+    const safe = data.q.replace(/[,()%*]/g, "");
+    if (safe) {
+      if (/^\d+$/.test(safe)) {
+        const { data: p } = await context.admin.from("profiles").select("id").eq("telegram_id", Number(safe));
+        q = q.in("user_id", (p ?? []).map((x) => x.id).concat("00000000-0000-0000-0000-000000000000"));
+      } else if (/^[0-9a-f-]{36}$/i.test(safe)) q = q.eq("user_id", safe);
+      else q = q.or(`reference.ilike.%${safe}%,reason.ilike.%${safe}%,admin_identity.ilike.%${safe}%`);
     }
-    return { ok: true };
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
 
 export const adminSetBlocked = createServerFn({ method: "POST" })
@@ -309,15 +328,17 @@ export const adminReviewTopup = createServerFn({ method: "POST" })
     return { ...d, tokens: Math.floor(Number(d.tokens) || 0), note: (d.note ?? "").slice(0, 300) };
   })
   .handler(async ({ data, context }) => {
-    // Claim only pending rows so a request can't be credited twice.
-    const { data: rows, error } = await context.admin
-      .from("topup_requests")
-      .update({ status: data.approve ? "approved" : "rejected", tokens_granted: data.approve ? data.tokens : null, admin_note: data.note || null, reviewed_at: new Date().toISOString() })
-      .eq("id", data.id).eq("status", "pending").select("user_id");
-    if (error) throw new Error(error.message);
-    const row = rows?.[0];
-    if (!row) throw new Error("Request was already reviewed");
-    void row;
+    if (data.approve) {
+      // Status change + ledger credit happen in one database transaction.
+      const { error } = await context.admin.rpc("approve_topup", { _id: data.id, _tokens: data.tokens, _note: data.note, _admin: context.adminIdentity });
+      if (error) throw new Error(error.message);
+    } else {
+      const { data: rows, error } = await context.admin.from("topup_requests")
+        .update({ status: "rejected", admin_note: data.note || null, reviewed_at: new Date().toISOString() })
+        .eq("id", data.id).eq("status", "pending").select("id");
+      if (error) throw new Error(error.message);
+      if (!rows?.length) throw new Error("Request was already reviewed");
+    }
     return { ok: true };
   });
 

@@ -284,7 +284,11 @@ function UsersTab() {
     const v = prompt(sign > 0 ? "Tokens to grant:" : "Tokens to deduct:");
     const n = Math.floor(Number(v));
     if (!v || !(n > 0)) return;
-    try { await adjust({ data: { userId: id, delta: sign * n } }); toast.success("Balance updated"); refresh(); } catch (e) { onErr(e as Error); }
+    const reason = prompt("Reason (required, recorded in the ledger):")?.trim() ?? "";
+    if (reason.length < 3) { toast.error("A reason is required"); return; }
+    // One reference per submission so retries/double-clicks are applied once.
+    const reference = `adm-${crypto.randomUUID()}`;
+    try { const r = await adjust({ data: { userId: id, amount: sign * n, reason, reference } }); toast.success(`Balance now ${fmt(r.balance)}`); refresh(); } catch (e) { onErr(e as Error); }
   }
   return (
     <Section title="Users">
@@ -475,7 +479,7 @@ function TelegramTab() {
   const st = useServerFn(A.adminTelegramStatus);
   const reg = useServerFn(A.adminRegisterWebhook);
   const { data, isLoading, refetch, isFetching } = useQuery({ queryKey: ["a-tg"], queryFn: () => st() });
-  const m = useMutation({ mutationFn: () => reg(), onSuccess: () => { toast.success("Webhook registered"); refetch(); }, onError: onErr });
+  const m = useMutation({ mutationFn: () => { const c = prompt("This changes the LIVE Telegram webhook. Type REGISTER to confirm:"); if (c !== "REGISTER") throw new Error("Cancelled"); return reg({ data: { confirm: c } }); }, onSuccess: () => { toast.success("Webhook registered"); refetch(); }, onError: onErr });
   if (isLoading || !data) return <ListSkeleton />;
   const matches = data.webhook?.url === data.expectedUrl;
   return (
@@ -486,13 +490,14 @@ function TelegramTab() {
         <Stat k="Pending updates" v={data.webhook?.pending_update_count ?? "—"} />
       </div>
       {data.error && <div className="well p-4 text-sm text-destructive">{data.error}</div>}
+      {data.configError && <div className="well p-4 text-sm text-destructive">Webhook config: {data.configError}</div>}
       <div className="well space-y-2 p-4 font-mono text-xs">
         <div><span className="label-plate">Expected webhook</span><div className="break-all">{data.expectedUrl}</div></div>
         <div><span className="label-plate">Registered webhook</span><div className={cn("break-all", !matches && "text-destructive")}>{data.webhook?.url || "none"}</div></div>
         {data.webhook?.last_error_message && <div className="text-destructive">Last error: {data.webhook.last_error_message}{data.webhook.last_error_date ? ` (${new Date(data.webhook.last_error_date * 1000).toLocaleString()})` : ""}</div>}
       </div>
       <div className="flex gap-2">
-        <Button onClick={() => m.mutate()} disabled={m.isPending}>{matches ? "Re-register webhook" : "Register webhook"}</Button>
+        <Button onClick={() => m.mutate()} disabled={m.isPending || !data.expectedUrl}>{matches ? "Re-register webhook" : "Register webhook"}</Button>
         <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>Refresh</Button>
       </div>
     </div>

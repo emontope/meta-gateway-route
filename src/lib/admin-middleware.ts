@@ -9,11 +9,10 @@ export const requireAdmin = createMiddleware({ type: "function" }).server(async 
   const token = getCookie(ADMIN_COOKIE);
   if (!token) throw new Error("Admin session required");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("admin_sessions")
-    .select("expires_at")
-    .eq("token_hash", await sha256Hex(token))
-    .maybeSingle();
+  const hash = await sha256Hex(token);
+  const { data } = await supabaseAdmin.from("admin_sessions").select("expires_at, ip").eq("token_hash", hash).maybeSingle();
   if (!data || new Date(data.expires_at) < new Date()) throw new Error("Admin session required");
-  return next({ context: { admin: supabaseAdmin } });
+  // Stable, non-secret identity for the ledger/audit trail: session hash prefix + login IP.
+  const adminIdentity = `admin-session:${hash.slice(0, 12)}@${data.ip ?? "unknown"}`;
+  return next({ context: { admin: supabaseAdmin, adminIdentity } });
 });
