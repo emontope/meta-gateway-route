@@ -135,7 +135,7 @@ describe("credit reservation", () => {
   });
 
   it("treats an upstream timeout like a network failure (released, no charge)", async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const m = memStore(10_000);
     const f = vi.fn((_u: string, init: RequestInit) => new Promise<Response>((_, rej) => init.signal!.addEventListener("abort", () => rej(new Error("upstream timeout")))));
     const p = handleChat(req({ model: "m", messages: msgs }), m.store, f as unknown as typeof fetch);
