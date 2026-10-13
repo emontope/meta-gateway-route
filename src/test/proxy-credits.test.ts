@@ -139,7 +139,7 @@ describe("credit reservation", () => {
     const m = memStore(10_000);
     const f = vi.fn((_u: string, init: RequestInit) => new Promise<Response>((_, rej) => init.signal!.addEventListener("abort", () => rej(new Error("upstream timeout")))));
     const p = handleChat(req({ model: "m", messages: msgs }), m.store, f as unknown as typeof fetch);
-    await vi.advanceTimersByTimeAsync(61_000);
+    for (let i = 0; i < 5; i++) await vi.advanceTimersByTimeAsync(61_000);
     const res = await p;
     vi.useRealTimers();
     expect(res.status).toBe(502);
